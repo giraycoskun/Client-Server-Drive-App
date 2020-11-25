@@ -7,57 +7,292 @@ using System.Data;
 
 using MySql.Data.MySqlClient;
 
+//MySqlClient reference: https://dev.mysql.com/doc/connector-net/en/connector-net-tutorials-sql-command.html
+
 namespace Server
 {
+    public class File
+    {
+        public File() { }
+
+        public enum AccessType
+        {
+            PUBLIC = 0, 
+            PRIVATE = 1 
+        }
+
+        public File(int id, string fileName, string filePath, string owner, int counter, AccessType type)
+        {
+            this.Id = id;
+            this.FileName = fileName;
+            this.FilePath = filePath;
+            this.Owner = owner;
+            this.Counter = counter;
+            this.FileAccessType = type;
+        }
+        
+        public int Id { get; set; }
+        public string FileName { get; set; }
+        public string FilePath { get; set; }
+        public string Owner { get; set; }
+        public int Counter { get; set; }
+        public AccessType FileAccessType { get; set; }
+    }
+    
+    public static class FileUtils
+    {
+        public static File.AccessType AccessTypeConverter(string val)
+        {
+            switch (val)
+            {
+                case "PUBLIC":
+                    return File.AccessType.PUBLIC;
+
+                case "PRIVATE":
+                    return File.AccessType.PRIVATE;
+                
+                default:
+                    throw new Exception("INVALID ACCESS TYPE INPUTTED CONVERTER");
+
+            }
+        }
+
+        public static File.AccessType AccessTypeConverter(int key)
+        {
+            switch (key)
+            {
+                case 0:
+                    return File.AccessType.PUBLIC;
+
+                case 1:
+                    return File.AccessType.PRIVATE;
+
+                default:
+                    throw new Exception("INVALID ACCESS TYPE INPUTTED CONVERTER");
+
+            }
+        }
+    }
+    
     static class Program
     {
-        //db.FILES 
-        public static void dumbDB()
-        {
-            string connstring = @"server=remotemysql.com;userid=ioI0xzbThf;password=VGITbQxEEa;database=ioI0xzbThf";
+        //Singleton (Lazy Initilization)
+        private static MySqlConnection mySqlConnection = null;
+        private const string CONNECTION_STRING = @"server=remotemysql.com;userid=ioI0xzbThf;password=VGITbQxEEa;database=ioI0xzbThf";
 
-            MySqlConnection conn = null;
+        //QUERIES
+        private const string INSERT_SQL = 
+            "INSERT INTO FILES (fileName, filePath, owner, incCount, accessType) VALUES(@fileName, @filePath, @owner, @accessType)";
+
+        private const string UPDATE_INCCOUNT_SQL = "UPDATE FILES SET incCount = @newIncCount WHERE fileName = @fileName";
+        private const string UPDATE_ACCESS_TYPE_SQL = "UPDATE FILES SET accessType = @newAccessType WHERE fileName = @fileName";
+
+        private const string DELETE_FILE_BY_NAME_SQL = "DELETE FROM FILES WHERE fileName = @fileName";
+        private const string DELETE_FILE_BY_ID_SQL = "DELETE FROM FILES WHERE id = @id";
+
+        private const string GET_ALL_FILES_SQL = "SELECT * FROM FILES";
+        private const string GET_FILES_BY_OWNER_SQL = "SELECT * FROM FILES WHERE owner = @owner";
+        private const string GET_FILES_BY_ACCESS_TYPE_SQL = "SELECT * FROM FILES WHERE accessType = @accessType";
+        private const string GET_ALL_FILE_NAMES_SQL = "SELECT fileName FROM FILES";
+        private const string GET_PUBLIC_FILE_NAMES_SQL = "SELECT fileName FROM FILES WHERE  accessType = 'PUBLIC'";
+        public static MySqlConnection GetMySqlConnection()
+        {
+            if (mySqlConnection == null)
+            {
+                try
+                {
+                    mySqlConnection = new MySqlConnection(CONNECTION_STRING);
+                    mySqlConnection.Open();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: {0}", e.ToString());
+                    //Terminate program execution
+                    //System.Environment.Exit(0);
+                    throw e;
+                }
+            }
+
+            if (mySqlConnection.State == ConnectionState.Closed || mySqlConnection.State == ConnectionState.Broken)
+            {
+                try
+                {
+                    mySqlConnection.Open();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: {0}", e.ToString());
+                    throw e;
+                }                
+            }
+
+            return mySqlConnection;
+
+        }
+
+        public static void DumbDB()
+        {
+
+            MySqlConnection conn = GetMySqlConnection();
+
+            string query = "SELECT * FROM FILES;";
+            MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
+            DataSet ds = new DataSet();
+            da.Fill(ds, "table_name");
+            DataTable dt = ds.Tables["table_name"];
+
+            foreach (DataRow row in dt.Rows)
+            {
+                foreach (DataColumn col in dt.Columns)
+                {
+                    Console.Write(row[col] + "\t");
+                }
+
+                Console.Write("\n");
+            }
+        }
+        
+        public static List<File> GetAllFiles()
+        {
+            List<File> fileList = new List<File>();
 
             try
             {
-                conn = new MySqlConnection(connstring);
-                conn.Open();
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_ALL_FILES_SQL, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
 
-                string query = "SELECT * FROM FILES;";
-                MySqlDataAdapter da = new MySqlDataAdapter(query, conn);
-                DataSet ds = new DataSet();
-                da.Fill(ds, "table_name");
-                DataTable dt = ds.Tables["table_name"];
-
-                foreach (DataRow row in dt.Rows)
+                while (rdr.Read())
                 {
-                    foreach (DataColumn col in dt.Columns)
-                    {
-                        Console.Write(row[col] + "\t");
-                    }
-
-                    Console.Write("\n");
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    fileList.Add(newFile);
                 }
+
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                //TO-DO
+            }
+
+            return fileList;
+        }
+        public static List<File> GetFilesByOwner(String owner)
+        {
+            List<File> fileList = new List<File>();
+
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_FILES_BY_OWNER_SQL, conn);
+                cmd.Parameters.AddWithValue("@owner", owner);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    fileList.Add(newFile);
+                }
+
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                //TO-DO
+            }
+
+            return fileList;
+        }
+        public static List<File> GetFilesByAccessType(File.AccessType accessType)
+        {
+            List<File> fileList = new List<File>();
+
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_FILES_BY_ACCESS_TYPE_SQL, conn);
+                cmd.Parameters.AddWithValue("@accessType", accessType);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    fileList.Add(newFile);
+                }
+
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                //TO-DO
+            }
+
+            return fileList;
+        }
+
+        public static List<String> GetAllFileNames()
+        {
+            List<String> fileNames = new List<String>();
+
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_ALL_FILE_NAMES_SQL, conn);
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    String fileName = rdr.GetString(0);
+                    fileNames.Add(fileName);
+                }
+
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                //TO-DO
+            }
+
+            return fileNames;
+        }
+
+
+        public static void InsertFile(String fileName, String filePath, String owner, File.AccessType accessType )
+        {
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+
+                MySqlCommand cmd = new MySqlCommand(INSERT_SQL, conn);
+                cmd.Parameters.AddWithValue("@fileName", fileName);
+                cmd.Parameters.AddWithValue("@filePath", filePath);
+                cmd.Parameters.AddWithValue("@owner", owner);
+                cmd.Parameters.AddWithValue("@accessType", accessType);
+
+                cmd.ExecuteNonQuery();
             }
             catch (Exception e)
             {
                 Console.WriteLine("Error: {0}", e.ToString());
             }
-            finally
-            {
-                if (conn != null)
-                {
-                    conn.Close();
-                }
-            }
+
         }
+
+        public static void UpdateFile()
+        {
+
+        }
+
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
         static void Main()
         {
-            dumbDB();
+            //InsertFile("testFile", "testPath", "testOwner", 1, File.AccessType.PRIVATE);
+           //List<File> files = GetAllFilesByOwner("cankutcoskun");
+
             /*
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
