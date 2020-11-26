@@ -21,11 +21,13 @@ namespace Server
 
         int portNum;
         int MAX_CLIENT = 20;
+        bool listening;
         string fileDirectory;
         Socket server;
-        public static ManualResetEvent allDone = new ManualResetEvent(false);
+        //public static ManualResetEvent allDone = new ManualResetEvent(false);
         IPAddress ipAddress;
-        List<TcpClient> clientList = new List<TcpClient>();
+        List<Socket> clientSocketList = new List<Socket>() ;
+        List<string> usernameList = new List<string>();
 
         public Form1()
         {
@@ -36,6 +38,8 @@ namespace Server
             IPHostEntry ip = Dns.GetHostEntry(host);
             logBox.AppendText("Server IP: " + ip.AddressList[1].ToString()+"\n");
             ipAddress = ip.AddressList[1];
+            //clientSocketList = new List<Socket>();
+            //usernameList = new List<string>();
 
         }
 
@@ -71,10 +75,12 @@ namespace Server
                 server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 server.Bind(localEndPoint);
                 server.Listen(MAX_CLIENT);
+                listening = true;
 
                 logBox.AppendText($"Server STARTED at port: {portNum} \n");
-                
 
+                Thread acceptThread = new Thread(Accept);
+                acceptThread.Start();
 
 
             }
@@ -90,7 +96,9 @@ namespace Server
         {
             try
             {
-                server.Shutdown(SocketShutdown.Both);
+
+                server.Close();
+                //listening = false;
                 logBox.AppendText($"Server STOPPED \n");
                 portBox.Text = "";
                 fileBox.Text = "";
@@ -101,8 +109,54 @@ namespace Server
             {
 
                 logBox.AppendText($"ERROR: Server cannot stop \n");
+            }            
+        }
+
+        private void Accept()
+        {
+            while (listening)
+            {
+                try
+                {
+                    Socket newClient = server.Accept();
+                    clientSocketList.Add(newClient);
+                    logBox.AppendText("A client is connected.\n");
+
+                    Thread receiveThread = new Thread(() => Receive(newClient)); // updated
+                    receiveThread.Start();
+                }
+                catch (Exception e)
+                {
+
+                    logBox.AppendText("The socket stopped working.\n");
+                    listening = false;
+                }
             }
-            
+        }
+
+        private void Receive(Socket thisClient) // updated
+        {
+            bool connected = true;
+
+            while (connected)
+            {
+                try
+                {
+                    Byte[] buffer = new Byte[64];
+                    thisClient.Receive(buffer);
+                    string incomingMessage = Encoding.Default.GetString(buffer);
+                    incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
+                    logBox.AppendText("Client: " + incomingMessage + "\n");
+                }
+                catch
+                {
+                    
+                    //thisClient.Close();
+                    clientSocketList.Remove(thisClient);
+                    listening = false;
+                    connected = false;
+                }
+            }
         }
 
     }

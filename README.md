@@ -27,6 +27,7 @@ Common Functions:
 
 **Helpful Docs:**
 - Async PRograms: https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/
+- https://docs.microsoft.com/en-us/dotnet/framework/network-programming/asynchronous-server-socket-example
 
 **GUI Elements**
 
