@@ -18,3 +18,29 @@ Public Static Objects for DB:
 
 Common Functions:
   - ??
+
+---
+
+## Connection
+
+### Server
+
+**Helpful Docs:**
+- Async PRograms: https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/
+
+**GUI Elements**
+
+- logBox
+- portBox
+- fileBox
+- startButton
+- stopButton
+
+**Possible Issues in Server:**
+
+
+	- Get IP adress of system: there are multiple IPs DNS. 
+	 IPHostEntry ip = Dns.GetHostEntry(host); return multiple IP addresses in ip.AdressList
+	 
+	 
+### Client
