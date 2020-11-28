@@ -19,7 +19,7 @@ namespace Server
 
     public partial class Form1 : Form
     {
-
+        
         int portNum;
         int MAX_CLIENT = 20;
         bool listening;
@@ -33,8 +33,7 @@ namespace Server
         public Form1()
         {
             InitializeComponent();
-            
-
+            Control.CheckForIllegalCrossThreadCalls = false;
             string host = Dns.GetHostName();
             IPHostEntry ip = Dns.GetHostEntry(host);
             logBox.AppendText("Server IP: " + ip.AddressList[1].ToString()+"\n");
@@ -142,46 +141,48 @@ namespace Server
                 catch (Exception e)
                 {
 
-                    logBox.AppendText("The socket stopped working.\n");
+                    logBox.AppendText("The server stopped working.\n");
                     listening = false;
                 }
             }
         }
 
         private void Receive(Socket thisClient) // updated
-        {            
+        {
+            string username = "";
             try
             {
                 Byte[] buffer = new Byte[64];
                 thisClient.Receive(buffer);
-                string username = Encoding.Default.GetString(buffer);
+                username = Encoding.Default.GetString(buffer);
                 username = username.Substring(0, username.IndexOf("\0"));
                 logBox.AppendText("Client tries to connect: " + username + "\n");
                 //incomingmessage = "giray"
                 //string username = incomingMessage.Split(' ').ToList()[1];
-                bool result = checkUsername(username);
-                if(result)
-                {
-
-                    logBox.AppendText("Client is Accepted: HI " + username + "\n");
-                    logBox.AppendText(usernameList.ToString()+"\n");
-                    handleClient(thisClient, username );
-                   
-                }
-                else
-                {
-                    thisClient.Close();
-                    logBox.AppendText("Client is Rejected: " + username + "\n");
-                    clientSocketList.Remove(thisClient);
-                }
             }
             catch
             {
                 thisClient.Close();
                 clientSocketList.Remove(thisClient);
                 listening = false;
+                return;
             }
-            
+            bool result = checkUsername(username);
+            if (result)
+            {
+                usernameList.Add(username);
+                logBox.AppendText("Client is Accepted: HI " + username + "\n");
+                //logBox.AppendText(usernameList.ToString()+"\n");
+                handleClient(thisClient, username);
+            }
+            else
+            {
+                rejectClient(thisClient, username);
+                thisClient.Shutdown(SocketShutdown.Both);
+                thisClient.Close();
+                logBox.AppendText("Client is Rejected: " + username + "\n");
+                clientSocketList.Remove(thisClient);
+            }
         }
         private bool checkUsername(string username)
         {
@@ -191,17 +192,11 @@ namespace Server
             {
                 result = false;
             }
-            else
-            {
-                usernameList.Add(username);
-            }
             return result;
         }
 
         private void handleClient(Socket client, string username)
         {
-            bool connected = true;
-
             try
             {
                 string hello_message = "Hi from server";
@@ -211,13 +206,31 @@ namespace Server
             catch
             {
                 logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!");
-                connected = false;
             }
 
+            bool connected = client.Connected;
             while (connected)
             {
-                //GET FILE
-                break;
+                connected = client.Connected;
+                //FILE UPLOAD
+                //Thread.Sleep(5000);
+                //logBox.AppendText("5 seconds past");
+            }
+            logBox.AppendText($"User: {username} disconnected");
+            usernameList.Remove(username);
+        }
+
+        private void rejectClient(Socket client, string username)
+        {
+            try
+            {
+                string hello_message = "REJECT";
+                Byte[] buffer = Encoding.Default.GetBytes(hello_message);
+                client.Send(buffer);
+            }
+            catch
+            {
+                logBox.AppendText($"ERROR: REJECT message from server to client {username} could not sent!!");
             }
         }
 

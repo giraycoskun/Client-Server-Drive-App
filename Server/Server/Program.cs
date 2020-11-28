@@ -444,7 +444,7 @@ namespace Server
         {
             //InsertFile("testFile", "testPath", "testOwner", 1, File.AccessType.PRIVATE);
             //List<File> files = GetFilesByOwner("cankutcoskun");
-            String fileName = "cankutcoskun_myFile_0";
+            //String fileName = "cankutcoskun_myFile_0";
             //IncrementFileCount(fileName);
             //UpdateAccessType(File.AccessType.PRIVATE, fileName);
             //DeleteFileByName(fileName);
@@ -455,11 +455,11 @@ namespace Server
             //List<File> publicFiles = GetFilesByAccessType(File.AccessType.PUBLIC);
             //List<File> files = GetFilesByOwner("testOwner");
             //List<File> files = GetAllFiles();
-            DeleteFileByName("testFile");
+            //DeleteFileByName("testFile");
 
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
 
         }
     }
