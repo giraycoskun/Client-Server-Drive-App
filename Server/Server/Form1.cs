@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -55,6 +56,7 @@ namespace Server
 
         private void startButton_Click(object sender, EventArgs e)
         {
+            bool input_check = true;
             string port = portBox.Text;
             portBox.Enabled = false;
             try
@@ -64,30 +66,35 @@ namespace Server
             catch (FormatException)
             {
                 logBox.AppendText($"ERROR not a valid number: '{portNum}' \n");
+                input_check = false;
             }
 
-            fileDirectory = fileBox.Text;
-            fileBox.Enabled = false;
-
-            try
+            if(fileDirectory== "")
             {
-                IPEndPoint localEndPoint = new IPEndPoint(ipAddress, portNum);
-                server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                server.Bind(localEndPoint);
-                server.Listen(MAX_CLIENT);
-                listening = true;
-
-                logBox.AppendText($"Server STARTED at port: {portNum} \n");
-
-                Thread acceptThread = new Thread(Accept);
-                acceptThread.Start();
-
-
+                input_check = false;
             }
-            catch (Exception except)
+            if (input_check)
             {
+                try
+                {
+                    IPEndPoint localEndPoint = new IPEndPoint(ipAddress, portNum);
+                    server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                    server.Bind(localEndPoint);
+                    server.Listen(MAX_CLIENT);
+                    listening = true;
 
-                logBox.AppendText($"ERROR:" + except.ToString() +"\n");
+                    logBox.AppendText($"Server STARTED at port: {portNum} \n");
+
+                    Thread acceptThread = new Thread(Accept);
+                    acceptThread.Start();
+
+
+                }
+                catch (Exception except)
+                {
+
+                    logBox.AppendText($"ERROR:" + except.ToString() + "\n");
+                }
             }
 
         }
@@ -98,7 +105,7 @@ namespace Server
             {
 
                 server.Close();
-                //listening = false;
+                listening = false;
                 logBox.AppendText($"Server STOPPED \n");
                 portBox.Text = "";
                 fileBox.Text = "";
@@ -108,7 +115,13 @@ namespace Server
             catch (Exception)
             {
 
-                logBox.AppendText($"ERROR: Server cannot stop \n");
+                logBox.AppendText($"ERROR: Server cannot stop properly \n");
+                listening = false;
+                logBox.AppendText($"Server STOPPED \n");
+                portBox.Text = "";
+                fileBox.Text = "";
+                portBox.Enabled = true;
+                fileBox.Enabled = true;
             }            
         }
 
@@ -124,6 +137,7 @@ namespace Server
 
                     Thread receiveThread = new Thread(() => Receive(newClient)); // updated
                     receiveThread.Start();
+                    
                 }
                 catch (Exception e)
                 {
@@ -135,29 +149,103 @@ namespace Server
         }
 
         private void Receive(Socket thisClient) // updated
+        {            
+            try
+            {
+                Byte[] buffer = new Byte[64];
+                thisClient.Receive(buffer);
+                string username = Encoding.Default.GetString(buffer);
+                username = username.Substring(0, username.IndexOf("\0"));
+                logBox.AppendText("Client tries to connect: " + username + "\n");
+                //incomingmessage = "giray"
+                //string username = incomingMessage.Split(' ').ToList()[1];
+                bool result = checkUsername(username);
+                if(result)
+                {
+
+                    logBox.AppendText("Client is Accepted: HI " + username + "\n");
+                    logBox.AppendText(usernameList.ToString()+"\n");
+                    handleClient(thisClient, username );
+                   
+                }
+                else
+                {
+                    thisClient.Close();
+                    logBox.AppendText("Client is Rejected: " + username + "\n");
+                    clientSocketList.Remove(thisClient);
+                }
+            }
+            catch
+            {
+                thisClient.Close();
+                clientSocketList.Remove(thisClient);
+                listening = false;
+            }
+            
+        }
+        private bool checkUsername(string username)
+        {
+            bool result = true;
+            
+            if (usernameList.Contains(username))
+            {
+                result = false;
+            }
+            else
+            {
+                usernameList.Add(username);
+            }
+            return result;
+        }
+
+        private void handleClient(Socket client, string username)
         {
             bool connected = true;
 
+            try
+            {
+                string hello_message = "Hi from server";
+                Byte[] buffer = Encoding.Default.GetBytes(hello_message);
+                client.Send(buffer);
+            }
+            catch
+            {
+                logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!");
+                connected = false;
+            }
+
             while (connected)
             {
-                try
-                {
-                    Byte[] buffer = new Byte[64];
-                    thisClient.Receive(buffer);
-                    string incomingMessage = Encoding.Default.GetString(buffer);
-                    incomingMessage = incomingMessage.Substring(0, incomingMessage.IndexOf("\0"));
-                    logBox.AppendText("Client: " + incomingMessage + "\n");
-                }
-                catch
-                {
-                    
-                    //thisClient.Close();
-                    clientSocketList.Remove(thisClient);
-                    listening = false;
-                    connected = false;
-                }
+                //GET FILE
+                break;
             }
         }
 
+        private void browseButton_Click(object sender, EventArgs e)
+        {
+            string temp = "";
+            fileBox.Enabled = true;
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                fileBox.Text = folderBrowserDialog1.SelectedPath;
+                temp = fileBox.Text;
+            }
+            if(Directory.Exists(temp))
+            {
+                fileDirectory = temp;
+                logBox.AppendText($"DOWNLOAD DIRECTORY: {fileDirectory} \n");
+                fileBox.Enabled = false;
+            }
+            else
+            {
+                logBox.AppendText("ERROR: path does not exist \n");
+                fileDirectory = "";
+            }
+        }
+
+        private void fileBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

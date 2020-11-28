@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -17,12 +18,12 @@ namespace Client
         IPAddress serverIPAddress;
         int serverPortNum;
         string username;
+        string filepath;
         Socket clientSocket;
         
         public CLIENT()
         {
             InitializeComponent();
-            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -52,14 +53,15 @@ namespace Client
 
         private void connectButton_Click(object sender, EventArgs e)
         {
+            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             ipBox.Enabled = false;
             portBox.Enabled = false;
             usernameBox.Enabled = false;
-
+            bool connected = false;
             string ipBoxText= ipBox.Text;
         
             username = usernameBox.Text;
-
+            //TODO: Input Check
             try
             {
                 Int32.TryParse(portBox.Text, out serverPortNum);
@@ -76,18 +78,31 @@ namespace Client
             {
                 clientSocket.Connect(serverIPAddress, serverPortNum);
                 outputBox.AppendText($"CONNECTED to the server with ip: {ipBoxText} and port: {serverPortNum} !\n");
-                string helloMessage = "HI " + username;
+                string helloMessage = username;
                 if (username != "" && helloMessage.Length <= 64)
                 {
                     Byte[] buffer = new Byte[64];
                     buffer = Encoding.Default.GetBytes(helloMessage);
                     clientSocket.Send(buffer);
                 }
+                else
+                {
+                    outputBox.AppendText("Username length is either empty or too long!");
+                }
                 
+                Byte[] hello_buffer = new Byte[64];
+                clientSocket.Receive(hello_buffer);
+                string incomingMessage = Encoding.Default.GetString(hello_buffer);
+                outputBox.AppendText(incomingMessage + "\n");
+
+               
+                //clientSocket.Close();
+
             }
             catch (Exception except)
             {
                 outputBox.AppendText("ERROR: cannot CONNECT " +except.ToString() + "\n");
+                clientSocket.Close();
             }
 
         }
@@ -97,14 +112,50 @@ namespace Client
             try
             {
                 clientSocket.Close();
+                outputBox.AppendText($"Connection STOPPED by client\n");
+                ipBox.Enabled = true;
+                portBox.Enabled = true;
+                usernameBox.Enabled = true;
             }
             catch (Exception except)
             {
 
                 outputBox.AppendText($"ERROR: Cannot Stop {except.ToString()}\n");
+            }            
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            uploadFileBox.Enabled = true;
+            OpenFileDialog openFileDialog1 = new OpenFileDialog();
+            openFileDialog1.Filter = "txt files (*.txt)|*.txt";
+            openFileDialog1.FilterIndex = 2;
+            openFileDialog1.ShowDialog();
+            uploadFileBox.Text = openFileDialog1.FileName;
+        }
+
+        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        {
+
+        }
+
+        private void uploadButton_Click(object sender, EventArgs e)
+        {
+            uploadFileBox.Enabled = false;
+            filepath = uploadFileBox.Text;
+            if (!File.Exists(filepath))
+            {
+                outputBox.AppendText("ERROR: File Does Not Exist\n");
+                uploadFileBox.Text = "";
+                uploadFileBox.Enabled = true;
             }
-   
-            
+
+            //UPLOAD FILE .....
         }
     }
 }

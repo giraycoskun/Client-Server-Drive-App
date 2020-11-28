@@ -1,9 +1,9 @@
 C:\Users\HP\Documents\CS 408 Project\Client\Client\bin\Debug\Client.exe.config
-C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache
+C:\Users\HP\Documents\CS 408 Project\Client\Client\bin\Debug\Client.exe
+C:\Users\HP\Documents\CS 408 Project\Client\Client\bin\Debug\Client.pdb
 C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.CLIENT.resources
 C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.Properties.Resources.resources
 C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.csproj.GenerateResource.Cache
-C:\Users\HP\Documents\CS 408 Project\Client\Client\bin\Debug\Client.exe
-C:\Users\HP\Documents\CS 408 Project\Client\Client\bin\Debug\Client.pdb
 C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.exe
 C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.pdb
+C:\Users\HP\Documents\CS 408 Project\Client\Client\obj\Debug\Client.csprojResolveAssemblyReference.cache

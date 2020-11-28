@@ -38,6 +38,10 @@
             this.stopButton = new System.Windows.Forms.Button();
             this.usernameBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
+            this.uploadFileBox = new System.Windows.Forms.TextBox();
+            this.browseButton = new System.Windows.Forms.Button();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.uploadButton = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // label1
@@ -73,9 +77,9 @@
             // 
             // outputBox
             // 
-            this.outputBox.Location = new System.Drawing.Point(36, 276);
+            this.outputBox.Location = new System.Drawing.Point(458, 48);
             this.outputBox.Name = "outputBox";
-            this.outputBox.Size = new System.Drawing.Size(745, 305);
+            this.outputBox.Size = new System.Drawing.Size(347, 502);
             this.outputBox.TabIndex = 3;
             this.outputBox.Text = "";
             // 
@@ -96,9 +100,9 @@
             // 
             // connectButton
             // 
-            this.connectButton.Location = new System.Drawing.Point(503, 88);
+            this.connectButton.Location = new System.Drawing.Point(46, 247);
             this.connectButton.Name = "connectButton";
-            this.connectButton.Size = new System.Drawing.Size(182, 26);
+            this.connectButton.Size = new System.Drawing.Size(182, 45);
             this.connectButton.TabIndex = 6;
             this.connectButton.Text = "CONNECT";
             this.connectButton.UseVisualStyleBackColor = true;
@@ -106,9 +110,9 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(503, 139);
+            this.stopButton.Location = new System.Drawing.Point(253, 247);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(182, 30);
+            this.stopButton.Size = new System.Drawing.Size(182, 43);
             this.stopButton.TabIndex = 7;
             this.stopButton.Text = "STOP";
             this.stopButton.UseVisualStyleBackColor = true;
@@ -130,11 +134,47 @@
             this.label4.TabIndex = 9;
             this.label4.Text = "Username";
             // 
+            // uploadFileBox
+            // 
+            this.uploadFileBox.Location = new System.Drawing.Point(155, 374);
+            this.uploadFileBox.Name = "uploadFileBox";
+            this.uploadFileBox.Size = new System.Drawing.Size(181, 26);
+            this.uploadFileBox.TabIndex = 11;
+            this.uploadFileBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            // 
+            // browseButton
+            // 
+            this.browseButton.Location = new System.Drawing.Point(342, 369);
+            this.browseButton.Name = "browseButton";
+            this.browseButton.Size = new System.Drawing.Size(104, 39);
+            this.browseButton.TabIndex = 12;
+            this.browseButton.Text = "browse";
+            this.browseButton.UseVisualStyleBackColor = true;
+            this.browseButton.Click += new System.EventHandler(this.button1_Click);
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
+            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
+            // 
+            // uploadButton
+            // 
+            this.uploadButton.Location = new System.Drawing.Point(12, 374);
+            this.uploadButton.Name = "uploadButton";
+            this.uploadButton.Size = new System.Drawing.Size(118, 28);
+            this.uploadButton.TabIndex = 13;
+            this.uploadButton.Text = "UPLOAD";
+            this.uploadButton.UseVisualStyleBackColor = true;
+            this.uploadButton.Click += new System.EventHandler(this.uploadButton_Click);
+            // 
             // CLIENT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(838, 619);
+            this.Controls.Add(this.uploadButton);
+            this.Controls.Add(this.browseButton);
+            this.Controls.Add(this.uploadFileBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.usernameBox);
             this.Controls.Add(this.stopButton);
@@ -165,6 +205,10 @@
         private System.Windows.Forms.Button stopButton;
         private System.Windows.Forms.TextBox usernameBox;
         private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TextBox uploadFileBox;
+        private System.Windows.Forms.Button browseButton;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Button uploadButton;
     }
 }
 

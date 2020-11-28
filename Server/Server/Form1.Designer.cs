@@ -37,6 +37,8 @@
             this.fileBox = new System.Windows.Forms.TextBox();
             this.startButton = new System.Windows.Forms.Button();
             this.stopButton = new System.Windows.Forms.Button();
+            this.chooseButton = new System.Windows.Forms.Button();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.SuspendLayout();
             // 
             // label1
@@ -98,6 +100,7 @@
             this.fileBox.Name = "fileBox";
             this.fileBox.Size = new System.Drawing.Size(187, 26);
             this.fileBox.TabIndex = 6;
+            this.fileBox.TextChanged += new System.EventHandler(this.fileBox_TextChanged);
             // 
             // startButton
             // 
@@ -119,11 +122,22 @@
             this.stopButton.UseVisualStyleBackColor = true;
             this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
             // 
+            // chooseButton
+            // 
+            this.chooseButton.Location = new System.Drawing.Point(360, 146);
+            this.chooseButton.Name = "chooseButton";
+            this.chooseButton.Size = new System.Drawing.Size(85, 33);
+            this.chooseButton.TabIndex = 9;
+            this.chooseButton.Text = "Choose";
+            this.chooseButton.UseVisualStyleBackColor = true;
+            this.chooseButton.Click += new System.EventHandler(this.browseButton_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(921, 643);
+            this.Controls.Add(this.chooseButton);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);
             this.Controls.Add(this.fileBox);
@@ -151,6 +165,8 @@
         private System.Windows.Forms.TextBox fileBox;
         private System.Windows.Forms.Button startButton;
         private System.Windows.Forms.Button stopButton;
+        private System.Windows.Forms.Button chooseButton;
+        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
     }
 }
 
