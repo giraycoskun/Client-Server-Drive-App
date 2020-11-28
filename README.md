@@ -95,4 +95,4 @@ Common Functions:
 - filepath: string
 - clientSocket: Socket
 
-**Possible Issues in Server:**
+**Possible Issues in Client:**
