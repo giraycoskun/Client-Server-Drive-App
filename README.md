@@ -54,7 +54,7 @@ Common Functions:
 
 - handleClient: fiel upload and other processes in a loop
 
-**Globals
+**Globals**
 
 - portNum: int
 - MAX_CLIENT: int
@@ -87,7 +87,7 @@ Common Functions:
 - button1_Click: (browse button) opens file browser via openFileDialog1 sets uploadFileBox 
 - uploadButton_Click: sends file from buffer
 
-**Globals
+**Globals**
 
 - serverIPAdress: IPAdress
 - serverPortNum: int
