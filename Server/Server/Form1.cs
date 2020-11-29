@@ -212,9 +212,36 @@ namespace Server
             while (connected)
             {
                 connected = client.Connected;
+                byte[] clientData = new byte[1024 * 5000];
+                int receivedBytesLen = client.Receive(clientData);
+                int fileNameLen = BitConverter.ToInt32(clientData, 0);
+                int dummy = Program.GetFilesByOwner(username).Count();
+                
+                string fileName = Encoding.ASCII.GetString(clientData, 4, fileNameLen);
+                string complete_name = "";
+                Console.WriteLine("dummy");
+                if (dummy == 0)
+                {
+                    complete_name = username + fileName;
+
+                }
+                else
+                {
+                     complete_name = username + fileName + "-" + "0" + $"{dummy}";          
+                }
+                /* Read file name */
+                BinaryWriter bWrite = new BinaryWriter(File.Open(fileDirectory + "/" + (complete_name), FileMode.Append)); ;
+               
+                bWrite.Write(clientData, 4 + fileNameLen, receivedBytesLen - 4 - fileNameLen);
+               
+                bWrite.Close();
+                
+               
+                Program.InsertFile(complete_name,fileDirectory,username,0);
                 //FILE UPLOAD
                 //Thread.Sleep(5000);
                 //logBox.AppendText("5 seconds past");
+                logBox.AppendText("Dosya geldi");
             }
             logBox.AppendText($"User: {username} disconnected");
             usernameList.Remove(username);

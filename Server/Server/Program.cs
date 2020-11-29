@@ -11,9 +11,9 @@ using MySql.Data.MySqlClient;
 
 namespace Server
 {
-    public class File
+    public class File1
     {
-        public File() { }
+        public File1() { }
 
         public enum AccessType
         {
@@ -21,7 +21,7 @@ namespace Server
             PRIVATE = 1
         }
 
-        public File(int id, string fileName, string filePath, string owner, int counter, AccessType type)
+        public File1(int id, string fileName, string filePath, string owner, int counter, AccessType type)
         {
             this.Id = id;
             this.FileName = fileName;
@@ -37,19 +37,21 @@ namespace Server
         public string Owner { get; set; }
         public int Counter { get; set; }
         public AccessType FileAccessType { get; set; }
+
+     
     }
 
     public static class FileUtils
     {
-        public static File.AccessType AccessTypeConverter(string val)
+        public static File1.AccessType AccessTypeConverter(string val)
         {
             switch (val)
             {
                 case "PUBLIC":
-                    return File.AccessType.PUBLIC;
+                    return File1.AccessType.PUBLIC;
 
                 case "PRIVATE":
-                    return File.AccessType.PRIVATE;
+                    return File1.AccessType.PRIVATE;
 
                 default:
                     throw new Exception("INVALID ACCESS TYPE INPUTTED");
@@ -57,15 +59,15 @@ namespace Server
             }
         }
 
-        public static File.AccessType AccessTypeConverter(int key)
+        public static File1.AccessType AccessTypeConverter(int key)
         {
             switch (key)
             {
                 case 0:
-                    return File.AccessType.PUBLIC;
+                    return File1.AccessType.PUBLIC;
 
                 case 1:
-                    return File.AccessType.PRIVATE;
+                    return File1.AccessType.PRIVATE;
 
                 default:
                     throw new Exception("INVALID ACCESS TYPE INPUTTED");
@@ -74,7 +76,7 @@ namespace Server
         }
     }
 
-    static class Program
+    public static class Program
     {
         //Singleton (Lazy Initilization)
         private static MySqlConnection mySqlConnection = null;
@@ -154,9 +156,9 @@ namespace Server
             }
         }
 
-        public static List<File> GetAllFiles()
+        public static List<File1> GetAllFiles()
         {
-            List<File> fileList = new List<File>();
+            List<File1> fileList = new List<File1>();
 
             try
             {
@@ -166,7 +168,7 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    File1 newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
                     fileList.Add(newFile);
                 }
 
@@ -179,9 +181,9 @@ namespace Server
 
             return fileList;
         }
-        public static List<File> GetFilesByOwner(String owner)
+        public static List<File1> GetFilesByOwner(String owner)
         {
-            List<File> fileList = new List<File>();
+            List<File1> fileList = new List<File1>();
 
             try
             {
@@ -192,7 +194,7 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    File1 newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
                     fileList.Add(newFile);
                 }
 
@@ -205,9 +207,9 @@ namespace Server
 
             return fileList;
         }
-        public static List<File> GetFilesByAccessType(File.AccessType accessType)
+        public static List<File1> GetFilesByAccessType(File1.AccessType accessType)
         {
-            List<File> fileList = new List<File>();
+            List<File1> fileList = new List<File1>();
 
             try
             {
@@ -218,7 +220,7 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    File1 newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
                     fileList.Add(newFile);
                 }
 
@@ -231,10 +233,10 @@ namespace Server
 
             return fileList;
         }
-        public static File GetFileByName(String fileName)
+        public static File1 GetFileByName(String fileName)
         {
             MySqlDataReader rdr = null;
-            File newFile = null;
+            File1 newFile = null;
 
             try
             {
@@ -246,7 +248,7 @@ namespace Server
                 if (rdr.HasRows)
                 {
                     rdr.Read();
-                    newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
                 }
 
             }
@@ -355,7 +357,7 @@ namespace Server
 
             return null;
         }
-        public static void InsertFile(String fileName, String filePath, String owner, File.AccessType accessType)
+        public static void InsertFile(String fileName, String filePath, String owner, File1.AccessType accessType)
         {
             try
             {
@@ -390,7 +392,7 @@ namespace Server
                 Console.WriteLine("Error: {0}", e.ToString());
             }
         }
-        public static void UpdateAccessType(File.AccessType newAccessType, String fileName)
+        public static void UpdateAccessType(File1.AccessType newAccessType, String fileName)
         {
             try
             {

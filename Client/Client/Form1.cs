@@ -178,7 +178,7 @@ namespace Client
                     uploadFileBox.Enabled = true;
                 }
 
-                uploadFile();
+                uploadFile(filepath);
                 uploadFileBox.Enabled = true;
 
             }
@@ -199,9 +199,36 @@ namespace Client
 
 
 
-        private void uploadFile()
+        private void uploadFile(string fileName)
         {
-            //TODO: SEND FILE
+            string filePath = "";
+            /* File reading operation. */
+            Console.WriteLine(fileName);
+            fileName = fileName.Replace("\\", "/");
+            while (fileName.IndexOf("/") > -1)
+            {
+                filePath += fileName.Substring(0, fileName.IndexOf("/") + 1);
+                fileName = fileName.Substring(fileName.IndexOf("/") + 1);
+            }
+            byte[] fileNameByte = Encoding.ASCII.GetBytes(fileName);
+      
+           
+            byte[] fileData = File.ReadAllBytes(filePath + fileName);
+            /* Read & store file byte data in byte array. */
+            byte[] clientData = new byte[4 + fileNameByte.Length + fileData.Length];
+            /* clientData will store complete bytes which will store file name length, 
+            file name & file data. */
+            byte[] fileNameLen = BitConverter.GetBytes(fileNameByte.Length);
+            /* File name length’s binary data. */
+            fileNameLen.CopyTo(clientData, 0);
+            fileNameByte.CopyTo(clientData, 4);
+            fileData.CopyTo(clientData, 4 + fileNameByte.Length);
+            /* copy these bytes to a variable with format line [file name length]
+            [file name] [ file content] */
+
+      
+            
+             clientSocket.Send(clientData);
         }
     }
 }
