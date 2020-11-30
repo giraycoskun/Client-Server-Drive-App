@@ -102,6 +102,7 @@ namespace Client
                         Byte[] hello_buffer = new Byte[64];
                         clientSocket.Receive(hello_buffer);
                         incomingMessage = Encoding.Default.GetString(hello_buffer);
+                        incomingMessage = incomingMessage.TrimEnd('\0');
                         outputBox.AppendText("Server: " + incomingMessage + "\n");
                     }
                     catch
