@@ -212,7 +212,7 @@ namespace Client
             }
             byte[] fileNameByte = Encoding.ASCII.GetBytes(fileName);
       
-           
+           //TODO
             byte[] fileData = File.ReadAllBytes(filePath + fileName);
             /* Read & store file byte data in byte array. */
             byte[] clientData = new byte[4 + fileNameByte.Length + fileData.Length];

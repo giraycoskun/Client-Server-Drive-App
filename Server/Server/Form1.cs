@@ -141,7 +141,7 @@ namespace Server
                 catch (Exception e)
                 {
 
-                    logBox.AppendText("The server stopped working.\n");
+                    logBox.AppendText("The server socket stopped.\n");
                     listening = false;
                 }
             }
@@ -207,11 +207,10 @@ namespace Server
             {
                 logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!");
             }
-
-            bool connected = client.Connected;
-            while (connected)
+            
+            while(checkConnection(client))
             {
-                connected = client.Connected;
+                //connected = client.Connected;
                 byte[] clientData = new byte[1024 * 5000];
                 int receivedBytesLen = client.Receive(clientData);
                 int fileNameLen = BitConverter.ToInt32(clientData, 0);
@@ -238,9 +237,6 @@ namespace Server
                 
                
                 Program.InsertFile(complete_name,fileDirectory,username,0);
-                //FILE UPLOAD
-                //Thread.Sleep(5000);
-                //logBox.AppendText("5 seconds past");
                 logBox.AppendText("Dosya geldi");
             }
             logBox.AppendText($"User: {username} disconnected");
@@ -286,6 +282,37 @@ namespace Server
         private void fileBox_TextChanged(object sender, EventArgs e)
         {
 
+        }
+
+        private bool checkConnection(Socket socket)
+        {
+            bool blockingState = socket.Blocking;
+            try
+            {
+                byte[] tmp = new byte[1];
+
+                socket.Blocking = false;
+                socket.Send(tmp, 0, 0);
+                Console.WriteLine("Connected!");
+            }
+            catch (SocketException e)
+            {
+                // 10035 == WSAEWOULDBLOCK
+                if (e.NativeErrorCode.Equals(10035))
+                {
+                    //Console.WriteLine("Still Connected, but the Send would block");
+                }
+                else
+                {
+                    //Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
+                }
+                logBox.AppendText("ERROR: Connection Check is a failed !!");
+            }
+            finally
+            {
+                socket.Blocking = blockingState;
+            }
+            return socket.Connected;
         }
     }
 }
