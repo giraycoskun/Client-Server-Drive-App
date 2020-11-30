@@ -95,6 +95,10 @@ namespace Server
                     logBox.AppendText($"ERROR:" + except.ToString() + "\n");
                 }
             }
+            else
+            {
+                portBox.Enabled = true;
+            }
 
         }
 

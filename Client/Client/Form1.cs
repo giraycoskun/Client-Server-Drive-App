@@ -59,7 +59,7 @@ namespace Client
             portBox.Enabled = false;
             usernameBox.Enabled = false;
             string ipBoxText= ipBox.Text;
-        
+            bool inputCheck = true;
             username = usernameBox.Text;
             //TODO: Input Check
             try
@@ -69,57 +69,64 @@ namespace Client
             catch
             {
                 outputBox.AppendText("ERROR: port number is not valid \n");
+                inputCheck = false;
             }
 
 
-            serverIPAddress = IPAddress.Parse(ipBoxText); 
+            serverIPAddress = IPAddress.Parse(ipBoxText);
 
-            try
+            if (inputCheck)
             {
-                clientSocket.Connect(serverIPAddress, serverPortNum);
-                connected = true;
-                outputBox.AppendText($"CONNECTED to the server with ip: {ipBoxText} and port: {serverPortNum} !\n");
-                string helloMessage = username;
-                if (username != "" && helloMessage.Length <= 64)
-                {
-                    Byte[] buffer = new Byte[64];
-                    buffer = Encoding.Default.GetBytes(helloMessage);
-                    clientSocket.Send(buffer);
-                }
-                else
-                {
-                    outputBox.AppendText("Username length is either empty or too long!\n");
-                }
-
-                string incomingMessage = "";
 
                 try
                 {
-                    Byte[] hello_buffer = new Byte[64];
-                    clientSocket.Receive(hello_buffer);
-                    incomingMessage = Encoding.Default.GetString(hello_buffer);
-                    outputBox.AppendText("Server: " + incomingMessage + "\n");
-                }
-                catch
-                {
-                    outputBox.AppendText("Connection STOPPED \n");
-                    clientSocket.Close();
-                    connected = false;
-                    enableInputBoxes();
-                }
+                    clientSocket.Connect(serverIPAddress, serverPortNum);
+                    connected = true;
+                    outputBox.AppendText($"CONNECTED to the server with ip: {ipBoxText} and port: {serverPortNum} !\n");
+                    string helloMessage = username;
+                    if (username != "" && helloMessage.Length <= 64)
+                    {
+                        Byte[] buffer = new Byte[64];
+                        buffer = Encoding.Default.GetBytes(helloMessage);
+                        clientSocket.Send(buffer);
+                    }
+                    else
+                    {
+                        outputBox.AppendText("Username length is either empty or too long!\n");
+                    }
 
-                if(incomingMessage == "REJECT")
-                {
-                    clientSocket.Close();
-                    connected = false;
-                    enableInputBoxes();
-                }
+                    string incomingMessage = "";
 
-            }
-            catch (Exception except)
-            {
-                outputBox.AppendText("\nERROR: Connection Fault not established \n");
-                clientSocket.Close();
+                    try
+                    {
+                        Byte[] hello_buffer = new Byte[64];
+                        clientSocket.Receive(hello_buffer);
+                        incomingMessage = Encoding.Default.GetString(hello_buffer);
+                        outputBox.AppendText("Server: " + incomingMessage + "\n");
+                    }
+                    catch
+                    {
+                        outputBox.AppendText("Connection STOPPED \n");
+                        clientSocket.Close();
+                        connected = false;
+                        enableInputBoxes();
+                    }
+
+                    if (incomingMessage == "REJECT")
+                    {
+                        clientSocket.Close();
+                        connected = false;
+                        enableInputBoxes();
+                    }
+
+                }
+                catch (Exception except)
+                {
+                    outputBox.AppendText("\nERROR: Connection Fault not established \n");
+                    clientSocket.Close();
+                    enableInputBoxes();
+                    
+                }
             }
 
         }
@@ -130,17 +137,17 @@ namespace Client
             {
                 try
                 {
-                    clientSocket.Close();
-                    connected = false;
-                    outputBox.AppendText($"\nConnection STOPPED by client\n");
                     ipBox.Enabled = true;
                     portBox.Enabled = true;
                     usernameBox.Enabled = true;
+                    clientSocket.Close();
+                    connected = false;
+                    outputBox.AppendText($"\nConnection STOPPED by client\n");
                 }
                 catch (Exception except)
                 {
 
-                    outputBox.AppendText($"\nERROR: Cannot Stop {except.ToString()}\n");
+                    outputBox.AppendText($"\nERROR: Cannot Stop \n");
                 }
             }            
         }
@@ -167,7 +174,17 @@ namespace Client
 
         private void uploadButton_Click(object sender, EventArgs e)
         {
-            if (clientSocket.Connected)
+            bool connection = false;
+            try
+            {
+                connection = checkConnection(clientSocket);
+            }
+            catch(Exception except)
+            {
+                outputBox.AppendText("Cannot upload without connection\n");
+            }
+
+            if (connection)
             {
                 uploadFileBox.Enabled = false;
                 filepath = uploadFileBox.Text;
@@ -177,10 +194,11 @@ namespace Client
                     uploadFileBox.Text = "";
                     uploadFileBox.Enabled = true;
                 }
-
-                uploadFile(filepath);
-                uploadFileBox.Enabled = true;
-
+                else
+                {
+                    uploadFile(filepath);
+                    uploadFileBox.Enabled = true;
+                }
             }
             else
             {
@@ -226,9 +244,39 @@ namespace Client
             /* copy these bytes to a variable with format line [file name length]
             [file name] [ file content] */
 
-      
-            
+ 
              clientSocket.Send(clientData);
+        }
+
+        private bool checkConnection(Socket socket)
+        {
+            bool blockingState = socket.Blocking;
+            try
+            {
+                byte[] tmp = new byte[1];
+
+                socket.Blocking = false;
+                socket.Send(tmp, 0, 0);
+                Console.WriteLine("Connected!");
+            }
+            catch (SocketException e)
+            {
+                // 10035 == WSAEWOULDBLOCK
+                if (e.NativeErrorCode.Equals(10035))
+                {
+                    //Console.WriteLine("Still Connected, but the Send would block");
+                }
+                else
+                {
+                    //Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
+                }
+                outputBox.AppendText("ERROR: Connection Check is a failed !!");
+            }
+            finally
+            {
+                socket.Blocking = blockingState;
+            }
+            return socket.Connected;
         }
     }
 }
