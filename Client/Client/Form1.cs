@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -15,6 +16,7 @@ namespace Client
 {
     public partial class CLIENT : Form
     {
+        int MAX_BUF = 1024;
         IPAddress serverIPAddress;
         int serverPortNum;
         string username;
@@ -104,6 +106,9 @@ namespace Client
                         incomingMessage = Encoding.Default.GetString(hello_buffer);
                         incomingMessage = incomingMessage.TrimEnd('\0');
                         outputBox.AppendText("Server: " + incomingMessage + "\n");
+                        Thread listenThread = new Thread(listenServer);
+                        listenThread.IsBackground = true;
+                        listenThread.Start();
                     }
                     catch
                     {
@@ -138,17 +143,19 @@ namespace Client
             {
                 try
                 {
-                    ipBox.Enabled = true;
-                    portBox.Enabled = true;
-                    usernameBox.Enabled = true;
-                    clientSocket.Close();
+                    enableInputBoxes();
+                    //ipBox.Enabled = true;
+                    //portBox.Enabled = true;
+                    //usernameBox.Enabled = true;
                     connected = false;
-                    outputBox.AppendText($"\nConnection STOPPED by client\n");
+                    clientSocket.Close();
+                    
+                    outputBox.AppendText($"Connection STOPPED by client\n");
                 }
                 catch (Exception except)
                 {
 
-                    outputBox.AppendText($"\nERROR: Cannot Stop \n");
+                    outputBox.AppendText($"ERROR: Cannot Stop \n");
                 }
             }            
         }
@@ -204,24 +211,82 @@ namespace Client
             else
             {
                 outputBox.AppendText("ERROR: NOT CONNECTED\n");
+                enableInputBoxes();
+                clientSocket.Close();
             }
             
         }
 
         private void enableInputBoxes()
         {
+            if(ipBox.InvokeRequired || portBox.InvokeRequired || usernameBox.Enabled)
+            {
+                ipBox.BeginInvoke(new Action(delegate { enableInputBoxes(); }));
+                return;
+            }
             ipBox.Enabled = true;
             portBox.Enabled = true;
             usernameBox.Enabled = true;
-
         }
 
 
 
-        private void uploadFile(string fileName)
+        private void uploadFile(string filepath)
         {
+            string filename = Path.GetFileName(filepath);
+            string uploadMessage = "UPLOAD" + " " + filename;
+            Byte[] commandBuffer = new Byte[64];
+            commandBuffer = Encoding.Default.GetBytes(uploadMessage);
+            clientSocket.Send(commandBuffer);
+
+            
+            Byte[] uploadBuffer = new Byte[MAX_BUF];
+            try
+            {
+                using (FileStream fsSource = new FileStream(filepath, FileMode.Open, FileAccess.Read))
+                {
+
+                    // Read the source file into a byte array.
+                    int numBytesToRead = (int)fsSource.Length;
+                    int numBytesRead = 0;
+                    while (numBytesToRead > 0)
+                    {
+                        // Read may return anything from 0 to numBytesToRead.
+                        int n = fsSource.Read(uploadBuffer, 0, MAX_BUF);
+
+                        clientSocket.Send(uploadBuffer);
+
+                        // Break when the end of the file is reached.
+                        if (n == 0)
+                            break;
+
+                        numBytesRead += n;
+                        numBytesToRead -= n;
+                    }
+                }
+                /*
+                if(!getServerMessage())
+                {
+                    throw new System.InvalidOperationException("Logfile cannot be read-only");
+                }
+                */
+            }
+            catch(Exception except)
+            {
+                outputBox.AppendText("Error: during file sending.\n");
+                outputBox.AppendText("Connection STOPPED \n");
+                clientSocket.Close();
+                connected = false;
+                enableInputBoxes();
+
+            }
+
+            
+
+            /*
             string filePath = "";
             /* File reading operation. */
+            /*
             Console.WriteLine(fileName);
             fileName = fileName.Replace("\\", "/");
             while (fileName.IndexOf("/") > -1)
@@ -234,19 +299,59 @@ namespace Client
            //TODO
             byte[] fileData = File.ReadAllBytes(filePath + fileName);
             /* Read & store file byte data in byte array. */
+            /*
             byte[] clientData = new byte[4 + fileNameByte.Length + fileData.Length];
             /* clientData will store complete bytes which will store file name length, 
             file name & file data. */
+            /*
             byte[] fileNameLen = BitConverter.GetBytes(fileNameByte.Length);
             /* File name length’s binary data. */
+            /*
             fileNameLen.CopyTo(clientData, 0);
             fileNameByte.CopyTo(clientData, 4);
             fileData.CopyTo(clientData, 4 + fileNameByte.Length);
             /* copy these bytes to a variable with format line [file name length]
             [file name] [ file content] */
 
- 
-             clientSocket.Send(clientData);
+
+            //clientSocket.Send(clientData);
+        }
+
+        private void listenServer()
+        {
+            while (connected)
+            {
+                string incomingMessage = "";
+
+                try
+                {
+                    Byte[] buffer = new Byte[64];
+                    clientSocket.Receive(buffer);
+                    incomingMessage = Encoding.Default.GetString(buffer);
+                    incomingMessage = incomingMessage.TrimEnd('\0');
+                    if (incomingMessage != "")
+                    {
+                        string text = "Server: " + incomingMessage + "\n";
+                        safeLogWrite(text);
+                    }
+                    else
+                    {
+                        throw new System.InvalidOperationException("Empty String Received");
+                    }
+                }
+                catch
+                {
+                    //outputBox.AppendText("Connection STOPPED \n");
+                    if (connected)
+                    {
+                        string text = "Connection Stopped by Server \n";
+                        safeLogWrite(text);
+                        clientSocket.Close();
+                        connected = false;
+                        enableInputBoxes();
+                    }
+                }
+            }
         }
 
         private bool checkConnection(Socket socket)
@@ -258,7 +363,7 @@ namespace Client
 
                 socket.Blocking = false;
                 socket.Send(tmp, 0, 0);
-                Console.WriteLine("Connected!");
+                //Console.WriteLine("Connected!");
             }
             catch (SocketException e)
             {
@@ -271,13 +376,26 @@ namespace Client
                 {
                     //Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
                 }
-                outputBox.AppendText("ERROR: Connection Check is a failed !!");
+                outputBox.AppendText("ERROR: Connection Check is a failed !!\n");
             }
             finally
             {
                 socket.Blocking = blockingState;
             }
             return socket.Connected;
+        }
+
+        //TODO
+        public void safeLogWrite(string EventText)
+        {
+            if (outputBox.InvokeRequired)
+            {
+                outputBox.BeginInvoke(new Action(delegate {
+                    safeLogWrite(EventText);
+                }));
+                return;
+            }
+            outputBox.AppendText(EventText);          
         }
     }
 }

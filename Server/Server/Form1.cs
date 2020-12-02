@@ -22,6 +22,7 @@ namespace Server
         
         int portNum;
         int MAX_CLIENT = 20;
+        int MAX_BUF = 1024;
         bool listening;
         string fileDirectory;
         Socket server;
@@ -38,6 +39,7 @@ namespace Server
             IPHostEntry ip = Dns.GetHostEntry(host);
             logBox.AppendText("Server IP: " + ip.AddressList[1].ToString()+"\n");
             ipAddress = ip.AddressList[1];
+            server = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
             //clientSocketList = new List<Socket>();
             //usernameList = new List<string>();
 
@@ -85,6 +87,7 @@ namespace Server
                     logBox.AppendText($"Server STARTED at port: {portNum} \n");
 
                     Thread acceptThread = new Thread(Accept);
+                    acceptThread.IsBackground = true;
                     acceptThread.Start();
 
 
@@ -92,7 +95,7 @@ namespace Server
                 catch (Exception except)
                 {
 
-                    logBox.AppendText($"ERROR:" + except.ToString() + "\n");
+                    logBox.AppendText($"ERROR: server socket stopped\n");
                 }
             }
             else
@@ -106,10 +109,23 @@ namespace Server
         {
             try
             {
-
+                 
                 server.Close();
-                listening = false;
                 logBox.AppendText($"Server STOPPED \n");
+                foreach (Socket socket in clientSocketList)
+                {
+                    try
+                    {
+                        socket.Close();
+                    }
+                    catch
+                    {
+                        logBox.AppendText("ERROR: Closing client socket failed\n");
+                    }
+
+                }
+                listening = false;
+                
                 portBox.Text = "";
                 fileBox.Text = "";
                 portBox.Enabled = true;
@@ -117,7 +133,6 @@ namespace Server
             }
             catch (Exception)
             {
-
                 logBox.AppendText($"ERROR: Server cannot stop properly \n");
                 listening = false;
                 logBox.AppendText($"Server STOPPED \n");
@@ -139,14 +154,18 @@ namespace Server
                     logBox.AppendText("A client is connected.\n");
 
                     Thread receiveThread = new Thread(() => Receive(newClient)); // updated
+                    receiveThread.IsBackground = true;
                     receiveThread.Start();
                     
                 }
                 catch (Exception e)
                 {
 
-                    logBox.AppendText("The server socket stopped.\n");
+                    //logBox.AppendText("The server socket stopped.\n");
+                    server.Close();
                     listening = false;
+                    portBox.Enabled = true;
+                    fileBox.Enabled = true;
                 }
             }
         }
@@ -209,11 +228,115 @@ namespace Server
             }
             catch
             {
-                logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!");
+                logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!\n");
             }
             
             while(checkConnection(client))
             {
+                string commandMessage = "";
+                string command = "";
+                string filename = "";
+                try
+                {
+                    Byte[] commandBuffer = new Byte[64];
+                    commandMessage = "";
+                    client.Receive(commandBuffer);
+                    commandMessage = Encoding.Default.GetString(commandBuffer);
+                    commandMessage = commandMessage.TrimEnd('\0');
+                    //UPLOAD filename
+                    //DELETE filename
+                    //DOWNLOAD filename
+                    //CH_ACCESS filename
+                    command = "";
+                    filename = "";
+                      
+                    command = commandMessage.Split()[0];
+                    filename = commandMessage.Split()[1];
+                }
+                catch
+                {
+                    //logBox.AppendText("Client is disconnected !!\n");
+                    break;
+                }
+
+                logBox.AppendText("Client: " + commandMessage + "\n");
+                if (command == "UPLOAD")
+                {
+                    int? count = Program.GetIncCountByName(filename);
+                    count = count == null ? 0 : count+1;
+                    /*
+                    if (count == null)
+                    {
+                        count = 0;
+                    }
+                    else
+                    {
+                        count = count + 1;
+                    }
+                    */
+                    
+                    string tempFileName = username + filename + "." + count.ToString();
+                    FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
+                    Byte[] uploadFileBuffer = new Byte[MAX_BUF];
+                    //string data = null;
+
+                    while (true)
+                    {
+                        try
+                        {
+                            
+                            int numBytes = client.Receive(uploadFileBuffer);
+                            
+                            int index = Array.FindIndex(uploadFileBuffer, checkEnd);
+                            //data = Encoding.ASCII.GetString(uploadFileBuffer, 0, numBytes);
+                            if (index > -1)
+                            {
+                                uploadFile.Write(uploadFileBuffer, 0, index);
+                                break;
+                            }
+                            else
+                            {
+                                uploadFile.Write(uploadFileBuffer, 0, numBytes);
+                            }
+                        }
+                        catch
+                        {
+                            logBox.AppendText("ERROR: During File Upload\n");
+                            break;
+                        }
+                        
+                        
+                    }
+                    uploadFile.Close();
+                    
+                    if(count == 0)
+                    {
+                        Program.InsertFile(filename, fileDirectory, username, File1.AccessType.PRIVATE);
+                    }
+                    else
+                    {
+                        Program.IncrementFileCount(filename);
+                    }
+
+                    List<File1> files = Program.GetAllFiles();
+
+                    logBox.AppendText($"File {tempFileName} UPLOADED\n");
+                    string message = filename + " UPLOADED";
+                    sendClientMessage(client, message);
+                }
+                else if(command == "DOWNLOAD")
+                { }
+                else if(command == "DELETE")
+                { }
+                else if(command == "CH_ACCESS")
+                { }
+                else
+                {
+                    logBox.AppendText($"Unknown Command: {command}\n");
+                }
+
+
+                /*
                 //connected = client.Connected;
                 byte[] clientData = new byte[1024 * 5000];
                 int receivedBytesLen = client.Receive(clientData);
@@ -232,7 +355,9 @@ namespace Server
                 {
                      complete_name = username + fileName + "-" + "0" + $"{dummy}";          
                 }
+                */
                 /* Read file name */
+                /*
                 BinaryWriter bWrite = new BinaryWriter(File.Open(fileDirectory + "/" + (complete_name), FileMode.Append)); ;
                
                 bWrite.Write(clientData, 4 + fileNameLen, receivedBytesLen - 4 - fileNameLen);
@@ -242,9 +367,24 @@ namespace Server
                
                 Program.InsertFile(complete_name,fileDirectory,username,0);
                 logBox.AppendText("Dosya geldi");
+                */
             }
-            logBox.AppendText($"User: {username} disconnected");
+            logBox.AppendText($"User: {username} disconnected\n");
             usernameList.Remove(username);
+            clientSocketList.Remove(client);
+        }
+
+        private void sendClientMessage(Socket client, string message)
+        {
+            try
+            {
+                Byte[] buffer = Encoding.Default.GetBytes(message);
+                client.Send(buffer);
+            }     
+            catch
+            {
+                logBox.AppendText($"ERROR: message to client: {message} not sent\n");
+            }
         }
 
         private void rejectClient(Socket client, string username)
@@ -257,7 +397,7 @@ namespace Server
             }
             catch
             {
-                logBox.AppendText($"ERROR: REJECT message from server to client {username} could not sent!!");
+                logBox.AppendText($"ERROR: REJECT message from server to client {username} could not sent!!\n");
             }
         }
 
@@ -310,13 +450,54 @@ namespace Server
                 {
                     //Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
                 }
-                logBox.AppendText("ERROR: Connection Check is a failed !!");
+                logBox.AppendText("ERROR: Connection Check is a failed !!\n");
             }
             finally
             {
                 socket.Blocking = blockingState;
             }
             return socket.Connected;
+        }
+
+        private bool checkEnd(Byte b)
+        {
+            if(b=='\0')
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            /*
+            try
+            {
+                server.Close();
+
+                foreach (Socket socket in clientSocketList)
+                {
+                    socket.Close();
+                }
+            }
+            catch
+            {
+
+            }
+            */
         }
     }
 }
