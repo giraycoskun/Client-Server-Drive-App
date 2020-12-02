@@ -16,7 +16,7 @@ namespace Client
 {
     public partial class CLIENT : Form
     {
-        int MAX_BUF = 1024;
+        int MAX_BUF = 2 << 22;
         IPAddress serverIPAddress;
         int serverPortNum;
         string username;
@@ -128,7 +128,7 @@ namespace Client
                 }
                 catch (Exception except)
                 {
-                    outputBox.AppendText("\nERROR: Connection Fault not established \n");
+                    outputBox.AppendText("ERROR: Connection Fault not established \n");
                     clientSocket.Close();
                     enableInputBoxes();
                     

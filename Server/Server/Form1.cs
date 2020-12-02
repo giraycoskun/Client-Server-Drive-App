@@ -22,7 +22,7 @@ namespace Server
         
         int portNum;
         int MAX_CLIENT = 20;
-        int MAX_BUF = 1024;
+        int MAX_BUF = 2 << 22;
         bool listening;
         string fileDirectory;
         Socket server;
@@ -109,7 +109,7 @@ namespace Server
         {
             try
             {
-                 
+                listening = false;
                 server.Close();
                 logBox.AppendText($"Server STOPPED \n");
                 foreach (Socket socket in clientSocketList)
@@ -124,8 +124,6 @@ namespace Server
                     }
 
                 }
-                listening = false;
-                
                 portBox.Text = "";
                 fileBox.Text = "";
                 portBox.Enabled = true;
@@ -230,7 +228,7 @@ namespace Server
             {
                 logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!\n");
             }
-            
+            bool fileUploadError = true;
             while(checkConnection(client))
             {
                 string commandMessage = "";
@@ -286,7 +284,7 @@ namespace Server
                         {
                             
                             int numBytes = client.Receive(uploadFileBuffer);
-                            
+                            //string income = Encoding.Default.GetString(uploadFileBuffer);
                             int index = Array.FindIndex(uploadFileBuffer, checkEnd);
                             //data = Encoding.ASCII.GetString(uploadFileBuffer, 0, numBytes);
                             if (index > -1)
@@ -302,27 +300,30 @@ namespace Server
                         catch
                         {
                             logBox.AppendText("ERROR: During File Upload\n");
+                            fileUploadError = false;
                             break;
                         }
                         
                         
                     }
                     uploadFile.Close();
-                    
-                    if(count == 0)
+                    if (fileUploadError)
                     {
-                        Program.InsertFile(filename, fileDirectory, username, File1.AccessType.PRIVATE);
-                    }
-                    else
-                    {
-                        Program.IncrementFileCount(filename);
-                    }
+                        if (count == 0)
+                        {
+                            Program.InsertFile(filename, fileDirectory, username, File1.AccessType.PRIVATE);
+                        }
+                        else
+                        {
+                            Program.IncrementFileCount(filename);
+                        }
 
-                    List<File1> files = Program.GetAllFiles();
+                        //List<File1> files = Program.GetAllFiles();
 
-                    logBox.AppendText($"File {tempFileName} UPLOADED\n");
-                    string message = filename + " UPLOADED";
-                    sendClientMessage(client, message);
+                        logBox.AppendText($"File {tempFileName} UPLOADED\n");
+                        string message = filename + " UPLOADED";
+                        sendClientMessage(client, message);
+                    }
                 }
                 else if(command == "DOWNLOAD")
                 { }
@@ -430,33 +431,40 @@ namespace Server
 
         private bool checkConnection(Socket socket)
         {
-            bool blockingState = socket.Blocking;
-            try
+            if (listening)
             {
-                byte[] tmp = new byte[1];
+                bool blockingState = socket.Blocking;
+                try
+                {
+                    byte[] tmp = new byte[1];
 
-                socket.Blocking = false;
-                socket.Send(tmp, 0, 0);
-                Console.WriteLine("Connected!");
-            }
-            catch (SocketException e)
-            {
-                // 10035 == WSAEWOULDBLOCK
-                if (e.NativeErrorCode.Equals(10035))
-                {
-                    //Console.WriteLine("Still Connected, but the Send would block");
+                    socket.Blocking = false;
+                    socket.Send(tmp, 0, 0);
+                    Console.WriteLine("Connected!");
                 }
-                else
+                catch (SocketException e)
                 {
-                    //Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
+                    // 10035 == WSAEWOULDBLOCK
+                    if (e.NativeErrorCode.Equals(10035))
+                    {
+                        //Console.WriteLine("Still Connected, but the Send would block");
+                    }
+                    else
+                    {
+                        //Console.WriteLine("Disconnected: error code {0}!", e.NativeErrorCode);
+                    }
+                    logBox.AppendText("ERROR: Connection Check is a failed !!\n");
                 }
-                logBox.AppendText("ERROR: Connection Check is a failed !!\n");
+                finally
+                {
+                    socket.Blocking = blockingState;
+                }
+                return socket.Connected;
             }
-            finally
+            else
             {
-                socket.Blocking = blockingState;
+                return false;
             }
-            return socket.Connected;
         }
 
         private bool checkEnd(Byte b)
