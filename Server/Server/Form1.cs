@@ -44,7 +44,7 @@ namespace Server
             //usernameList = new List<string>();
 
         }
-
+        
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
 
@@ -64,7 +64,7 @@ namespace Server
             {
                 portNum = Int32.Parse(port);
             }
-            catch (FormatException fe)
+            catch (FormatException except)
             {
                 logBox.AppendText($"ERROR not a valid number: '{portNum}' \n");
                 input_check = false;
@@ -111,6 +111,7 @@ namespace Server
             }
             else
             {
+                logBox.AppendText($"Invalid or Empty Input\n");
                 portBox.Enabled = true;
             }
 

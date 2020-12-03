@@ -19,7 +19,7 @@ namespace Client
         int MAX_BUF = (2 << 22);
         IPAddress serverIPAddress;
         int serverPortNum;
-        bool sendFilePermit = false;
+        //bool sendFilePermit = false;
         string username;
         string filepath;
         bool connected = false;
@@ -68,17 +68,17 @@ namespace Client
             try
             {
                 Int32.TryParse(portBox.Text, out serverPortNum);
+                serverIPAddress = IPAddress.Parse(ipBoxText);
             }
             catch
             {
-                outputBox.AppendText("ERROR: port number is not valid \n");
+                ipBox.Text = "";
+                portBox.Text = "";
+                usernameBox.Text = "";
                 inputCheck = false;
             }
 
-
-            serverIPAddress = IPAddress.Parse(ipBoxText);
-
-            if (inputCheck)
+            if (inputCheck && username != "" && ipBoxText != "" )
             {
 
                 try
@@ -136,6 +136,11 @@ namespace Client
                     
                 }
             }
+            else
+            {
+                outputBox.AppendText("Invalid or Empty Inputs\n");
+                enableInputBoxes();
+            }
 
         }
 
@@ -159,6 +164,10 @@ namespace Client
 
                     outputBox.AppendText($"ERROR: Cannot Stop \n");
                 }
+            }
+            else
+            {
+                outputBox.AppendText("ERROR: not connected\n");
             }            
         }
 
@@ -231,8 +240,6 @@ namespace Client
             usernameBox.Enabled = true;
         }
 
-
-
         private void uploadFile(string filepath)
         {
             string filename = Path.GetFileName(filepath);
@@ -281,8 +288,6 @@ namespace Client
                         numBytesToRead -= (ulong)n;
                         
                     }
-
-                    sendFilePermit = false;
                 }
                 
                 /*
@@ -407,7 +412,6 @@ namespace Client
             return socket.Connected;
         }
 
-        //TODO
         public void safeLogWrite(string EventText)
         {
             if (outputBox.InvokeRequired)
