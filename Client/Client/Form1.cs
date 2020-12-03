@@ -129,6 +129,7 @@ namespace Client
                 catch (Exception except)
                 {
                     outputBox.AppendText("ERROR: Connection Fault not established \n");
+                    connected = false;
                     clientSocket.Close();
                     enableInputBoxes();
                     
@@ -219,7 +220,7 @@ namespace Client
 
         private void enableInputBoxes()
         {
-            if(ipBox.InvokeRequired || portBox.InvokeRequired || usernameBox.Enabled)
+            if(ipBox.InvokeRequired || portBox.InvokeRequired || usernameBox.InvokeRequired)
             {
                 ipBox.BeginInvoke(new Action(delegate { enableInputBoxes(); }));
                 return;
@@ -245,32 +246,34 @@ namespace Client
             {
 
                 //clientSocket.SendFile(filepath);
-                
+               // StreamReader sr = new StreamReader("TestFile.txt")
                 using (FileStream fsSource = new FileStream(filepath, FileMode.Open, FileAccess.Read))
                 {
 
                     // Read the source file into a byte array.
-                    int numBytesToRead = (int)fsSource.Length;
+                    ulong numBytesToRead = (ulong)fsSource.Length;
                     Byte[] fileSizeBuffer = new Byte[64];
                     fileSizeBuffer = BitConverter.GetBytes(numBytesToRead);
                     clientSocket.Send(fileSizeBuffer);
 
                     
-                    int numBytesRead = 0;
+                    ulong numBytesRead = 0;
+                    int n, temp;
+
                     while (numBytesToRead > 0)
                     {
                         // Read may return anything from 0 to numBytesToRead.
-                        int n = fsSource.Read(uploadBuffer, 0, MAX_BUF);
-
-                        clientSocket.Send(uploadBuffer);
+                        n = fsSource.Read(uploadBuffer, 0, MAX_BUF);
+                        
+                        temp = clientSocket.Send(uploadBuffer);
 
                         // Break when the end of the file is reached.
                         
                         if (n == 0)
                             break;
 
-                        numBytesRead += n;
-                        numBytesToRead -= n;
+                        numBytesRead += (ulong)n;
+                        numBytesToRead -= (ulong)n;
                     }
                 }
                 

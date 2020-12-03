@@ -301,9 +301,9 @@ namespace Server
                         break;
                     }
                     
-                    int fileSize = BitConverter.ToInt32(fileSizeBuffer, 0);
+                    ulong fileSize = BitConverter.ToUInt64(fileSizeBuffer, 0);
                     //string data = null;
-                    int numBytesRead = 0;
+                    ulong numBytesRead = 0;
 
                     while (fileSize > numBytesRead)
                     {
@@ -311,7 +311,7 @@ namespace Server
                         {
                             
                             int numBytes = client.Receive(uploadFileBuffer);
-                            numBytesRead += numBytes;
+                            numBytesRead += (ulong)numBytes;
                             
                             int index = Array.FindIndex(uploadFileBuffer, checkEnd);
                             
