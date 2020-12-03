@@ -76,6 +76,13 @@ namespace Server
         }
     }
 
+
+    public static class MyDB
+    {
+
+    }
+
+
     public static class Program
     {
         //Singleton (Lazy Initilization)
@@ -84,7 +91,7 @@ namespace Server
 
         //QUERIES
         private const string INSERT_SQL =
-            "INSERT INTO FILES (fileName, filePath, owner, incCount, accessType) VALUES(@fileName, @filePath, @owner, @accessType)";
+            "INSERT INTO FILES (fileName, filePath, owner, accessType) VALUES(@fileName, @filePath, @owner, @accessType)";
 
         private const string UPDATE_COUNT_SQL = "UPDATE FILES SET incCount = @newIncCount WHERE fileName = @fileName";
         private const string UPDATE_ACCESS_TYPE_SQL = "UPDATE FILES SET accessType = @newAccessType WHERE fileName = @fileName";
@@ -367,7 +374,8 @@ namespace Server
                 cmd.Parameters.AddWithValue("@fileName", fileName);
                 cmd.Parameters.AddWithValue("@filePath", filePath);
                 cmd.Parameters.AddWithValue("@owner", owner);
-                cmd.Parameters.AddWithValue("@accessType", accessType);
+                //Enum access type error
+                cmd.Parameters.AddWithValue("@accessType", accessType.ToString());
 
                 cmd.ExecuteNonQuery();
             }
@@ -444,20 +452,6 @@ namespace Server
         [STAThread]
         static void Main()
         {
-            //InsertFile("testFile", "testPath", "testOwner", 1, File.AccessType.PRIVATE);
-            //List<File> files = GetFilesByOwner("cankutcoskun");
-            //String fileName = "cankutcoskun_myFile_0";
-            //IncrementFileCount(fileName);
-            //UpdateAccessType(File.AccessType.PRIVATE, fileName);
-            //DeleteFileByName(fileName);
-            //File returnedFile = GetFileByName("testFile");
-            //List<String> publicFileNames = GetPublicFileNames();
-            //List<String> fileNames = GetAllFileNames(); 
-            //List<File> privateFiles = GetFilesByAccessType(File.AccessType.PRIVATE);
-            //List<File> publicFiles = GetFilesByAccessType(File.AccessType.PUBLIC);
-            //List<File> files = GetFilesByOwner("testOwner");
-            //List<File> files = GetAllFiles();
-            //DeleteFileByName("testFile");
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

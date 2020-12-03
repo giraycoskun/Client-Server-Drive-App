@@ -64,7 +64,7 @@ namespace Server
             {
                 portNum = Int32.Parse(port);
             }
-            catch (FormatException)
+            catch (FormatException fe)
             {
                 logBox.AppendText($"ERROR not a valid number: '{portNum}' \n");
                 input_check = false;
