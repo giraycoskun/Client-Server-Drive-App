@@ -1,4 +1,10 @@
-# CS 408 Project
+# CS 408 Project FALL 2020-2021
+
+- Giray Coşkun - 25137 - giraycoskun@sabanciuniv.edu
+- Cankut Coşkun - 23776 - cankutcoksun@sabanciuniv.edu
+- Dilara Müstecep - 25292 - dilaramustecep@sabanciuniv.edu
+- Can Savrun - 23706 - cansavrun@sabanciuniv.edu
+- Mert Güngör - 24148 - mertgungor@sabanciuniv.edu
 
 ---
 ## Database Details
