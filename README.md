@@ -1,4 +1,4 @@
-# CS 408 Project FALL 2020-2021
+# CS 408 Project FALL 2020-2021 - Sabancı University
 
 - Giray Coşkun - 25137 - giraycoskun@sabanciuniv.edu
 - Cankut Coşkun - 23776 - cankutcoksun@sabanciuniv.edu
