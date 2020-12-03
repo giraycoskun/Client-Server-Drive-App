@@ -243,6 +243,9 @@ namespace Client
             Byte[] uploadBuffer = new Byte[MAX_BUF];
             try
             {
+
+                //clientSocket.SendFile(filepath);
+                
                 using (FileStream fsSource = new FileStream(filepath, FileMode.Open, FileAccess.Read))
                 {
 
@@ -251,6 +254,8 @@ namespace Client
                     Byte[] fileSizeBuffer = new Byte[64];
                     fileSizeBuffer = BitConverter.GetBytes(numBytesToRead);
                     clientSocket.Send(fileSizeBuffer);
+
+                    
                     int numBytesRead = 0;
                     while (numBytesToRead > 0)
                     {
@@ -268,6 +273,7 @@ namespace Client
                         numBytesToRead -= n;
                     }
                 }
+                
                 /*
                 if(!getServerMessage())
                 {
@@ -282,9 +288,10 @@ namespace Client
                 clientSocket.Close();
                 connected = false;
                 enableInputBoxes();
+                return;
 
             }
-
+            safeLogWrite("File Sending is finished!!\n");
             
 
             /*

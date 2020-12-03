@@ -287,6 +287,7 @@ namespace Server
                     string tempFileName = username + filename + "." + count.ToString();
                     FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
                     Byte[] uploadFileBuffer = new Byte[MAX_BUF];
+
                     Byte[] fileSizeBuffer = new Byte[64];
                     try
                     {
@@ -303,6 +304,7 @@ namespace Server
                     int fileSize = BitConverter.ToInt32(fileSizeBuffer, 0);
                     //string data = null;
                     int numBytesRead = 0;
+
                     while (fileSize > numBytesRead)
                     {
                         try
@@ -310,10 +312,9 @@ namespace Server
                             
                             int numBytes = client.Receive(uploadFileBuffer);
                             numBytesRead += numBytes;
-                            //string income = Encoding.Default.GetString(uploadFileBuffer);
+                            
                             int index = Array.FindIndex(uploadFileBuffer, checkEnd);
-                            //data = Encoding.ASCII.GetString(uploadFileBuffer, 0, numBytes);
-                            //logBox.AppendText(numBytes.ToString());
+                            
                             if (index > -1)
                             {
                                 uploadFile.Write(uploadFileBuffer, 0, index);
@@ -324,6 +325,8 @@ namespace Server
                                 
                                 uploadFile.Write(uploadFileBuffer, 0, numBytes);
                             }
+                           
+                            //uploadFile.Write(uploadFileBuffer, 0, numBytes);
                         }
                         catch
                         {
