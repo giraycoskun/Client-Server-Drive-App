@@ -24,7 +24,7 @@ namespace Server
         int MAX_CLIENT = 20;
         int MAX_BUF = (2 << 22);
         bool listening;
-        string fileDirectory;
+        string fileDirectory = "";
         Socket server;
         //public static ManualResetEvent allDone = new ManualResetEvent(false);
         IPAddress ipAddress;
@@ -189,6 +189,7 @@ namespace Server
                 username = Encoding.Default.GetString(buffer);
                 username = username.Substring(0, username.IndexOf("\0"));
                 logBox.AppendText("Client tries to connect: " + username + "\n");
+
                 //incomingmessage = "giray"
                 //string username = incomingMessage.Split(' ').ToList()[1];
             }
@@ -249,7 +250,7 @@ namespace Server
                 {
                     Byte[] commandBuffer = new Byte[64];
                     commandMessage = "";
-                    client.Receive(commandBuffer);
+                    int temp = client.Receive(commandBuffer);
                     commandMessage = Encoding.Default.GetString(commandBuffer);
                     commandMessage = commandMessage.TrimEnd('\0');
                     //UPLOAD filename
@@ -261,6 +262,9 @@ namespace Server
                       
                     command = commandMessage.Split()[0];
                     filename = commandMessage.Split()[1];
+                    //string incomingMessage = temp.ToString();
+                    //logBox.AppendText(incomingMessage);
+                    //logBox.AppendText(BitConverter.ToString(commandBuffer));
                 }
                 catch
                 {
@@ -291,7 +295,12 @@ namespace Server
                     Byte[] fileSizeBuffer = new Byte[64];
                     try
                     {
-                        client.Receive(fileSizeBuffer);
+                        int temp = client.Receive(fileSizeBuffer);
+                        //Byte[] temp_buffer = new Byte[64];
+                        //int temp = client.Receive(temp_buffer);
+                        //string incomingMessage = fileSizeBuffer.ToString();
+                        //logBox.AppendText(incomingMessage);
+                        //logBox.AppendText(BitConverter.ToString(temp_buffer));
                     }
                     catch
                     {
@@ -305,8 +314,19 @@ namespace Server
                     //string data = null;
                     ulong numBytesRead = 0;
 
+                    /*
+                    using (NetworkStream networkStream = new NetworkStream(client))
+                    using (FileStream fileStream = File.Open(tempFileName, FileMode.OpenOrCreate))
+                    {
+                        networkStream.CopyTo(fileStream);
+                        fileStream.Read();
+                    }
+                    */
+                    //sendClientMessage(client, "ACK");
                     while (fileSize > numBytesRead)
                     {
+                        if (fileSize == numBytesRead)
+                            logBox.AppendText("DEBUG");
                         try
                         {
                             
@@ -337,6 +357,7 @@ namespace Server
                         }          
                     }
                     uploadFile.Close();
+                    
                     if (fileUploadError)
                     {
                         if (count == 0)
@@ -354,6 +375,7 @@ namespace Server
                         string message = filename + " UPLOADED";
                         sendClientMessage(client, message);
                     }
+                    
                 }
                 else if(command == "DOWNLOAD")
                 { }

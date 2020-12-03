@@ -19,6 +19,7 @@ namespace Client
         int MAX_BUF = (2 << 22);
         IPAddress serverIPAddress;
         int serverPortNum;
+        bool sendFilePermit = false;
         string username;
         string filepath;
         bool connected = false;
@@ -238,6 +239,7 @@ namespace Client
             string uploadMessage = "UPLOAD" + " " + filename;
             Byte[] commandBuffer = new Byte[64];
             commandBuffer = Encoding.Default.GetBytes(uploadMessage);
+            Array.Resize(ref commandBuffer, 64);
             clientSocket.Send(commandBuffer);
 
             
@@ -252,8 +254,10 @@ namespace Client
 
                     // Read the source file into a byte array.
                     ulong numBytesToRead = (ulong)fsSource.Length;
-                    Byte[] fileSizeBuffer = new Byte[64];
-                    fileSizeBuffer = BitConverter.GetBytes(numBytesToRead);
+                    //Byte[] fileSizeBuffer = new Byte[64];
+
+                    Byte[] fileSizeBuffer = BitConverter.GetBytes(numBytesToRead);
+                    Array.Resize(ref fileSizeBuffer, 64);
                     clientSocket.Send(fileSizeBuffer);
 
                     
@@ -262,19 +266,23 @@ namespace Client
 
                     while (numBytesToRead > 0)
                     {
+                        
                         // Read may return anything from 0 to numBytesToRead.
                         n = fsSource.Read(uploadBuffer, 0, MAX_BUF);
-                        
+
                         temp = clientSocket.Send(uploadBuffer);
 
                         // Break when the end of the file is reached.
-                        
+
                         if (n == 0)
                             break;
 
                         numBytesRead += (ulong)n;
                         numBytesToRead -= (ulong)n;
+                        
                     }
+
+                    sendFilePermit = false;
                 }
                 
                 /*
