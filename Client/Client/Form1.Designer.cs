@@ -136,7 +136,7 @@
             // 
             // uploadFileBox
             // 
-            this.uploadFileBox.Location = new System.Drawing.Point(155, 374);
+            this.uploadFileBox.Location = new System.Drawing.Point(166, 392);
             this.uploadFileBox.Name = "uploadFileBox";
             this.uploadFileBox.Size = new System.Drawing.Size(181, 26);
             this.uploadFileBox.TabIndex = 11;
@@ -144,7 +144,7 @@
             // 
             // browseButton
             // 
-            this.browseButton.Location = new System.Drawing.Point(342, 369);
+            this.browseButton.Location = new System.Drawing.Point(40, 386);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(104, 39);
             this.browseButton.TabIndex = 12;
@@ -159,9 +159,9 @@
             // 
             // uploadButton
             // 
-            this.uploadButton.Location = new System.Drawing.Point(12, 374);
+            this.uploadButton.Location = new System.Drawing.Point(139, 431);
             this.uploadButton.Name = "uploadButton";
-            this.uploadButton.Size = new System.Drawing.Size(118, 28);
+            this.uploadButton.Size = new System.Drawing.Size(137, 38);
             this.uploadButton.TabIndex = 13;
             this.uploadButton.Text = "UPLOAD";
             this.uploadButton.UseVisualStyleBackColor = true;

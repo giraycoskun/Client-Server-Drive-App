@@ -16,7 +16,7 @@ namespace Client
 {
     public partial class CLIENT : Form
     {
-        int MAX_BUF = 2 << 22;
+        int MAX_BUF = (2 << 22);
         IPAddress serverIPAddress;
         int serverPortNum;
         string username;
@@ -248,6 +248,9 @@ namespace Client
 
                     // Read the source file into a byte array.
                     int numBytesToRead = (int)fsSource.Length;
+                    Byte[] fileSizeBuffer = new Byte[64];
+                    fileSizeBuffer = BitConverter.GetBytes(numBytesToRead);
+                    clientSocket.Send(fileSizeBuffer);
                     int numBytesRead = 0;
                     while (numBytesToRead > 0)
                     {
@@ -257,6 +260,7 @@ namespace Client
                         clientSocket.Send(uploadBuffer);
 
                         // Break when the end of the file is reached.
+                        
                         if (n == 0)
                             break;
 

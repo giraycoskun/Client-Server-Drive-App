@@ -10,3 +10,5 @@
 - **Issue 7:** Upload information is not sent to client -> fixed :+1:
 - **Issue 8:** When Server is closed from cross when client threads running application is not really closed stays at line 151 -> fixed :+1:
 - **Issue 9:** Database insert is not working!!
+
+# TESTS

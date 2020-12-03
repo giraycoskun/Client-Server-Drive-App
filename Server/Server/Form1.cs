@@ -22,7 +22,7 @@ namespace Server
         
         int portNum;
         int MAX_CLIENT = 20;
-        int MAX_BUF = 2 << 22;
+        int MAX_BUF = (2 << 22);
         bool listening;
         string fileDirectory;
         Socket server;
@@ -74,7 +74,7 @@ namespace Server
             {
                 input_check = false;
             }
-            if (input_check)
+            if (input_check && (!listening))
             {
                 try
                 {
@@ -96,7 +96,18 @@ namespace Server
                 {
 
                     logBox.AppendText($"ERROR: server socket stopped\n");
+                    server.Close();
+                    listening = false;
+                    portBox.Text = "";
+                    fileBox.Text = "";
+                    portBox.Enabled = true;
+                    fileBox.Enabled = true;
+
                 }
+            }
+            else if(listening)
+            {
+                logBox.AppendText($"Server is already listening.\n");
             }
             else
             {
@@ -276,17 +287,33 @@ namespace Server
                     string tempFileName = username + filename + "." + count.ToString();
                     FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
                     Byte[] uploadFileBuffer = new Byte[MAX_BUF];
+                    Byte[] fileSizeBuffer = new Byte[64];
+                    try
+                    {
+                        client.Receive(fileSizeBuffer);
+                    }
+                    catch
+                    {
+                        logBox.AppendText("ERROR: During File Upload\n");
+                        fileUploadError = false;
+                        uploadFile.Close();
+                        break;
+                    }
+                    
+                    int fileSize = BitConverter.ToInt32(fileSizeBuffer, 0);
                     //string data = null;
-
-                    while (true)
+                    int numBytesRead = 0;
+                    while (fileSize > numBytesRead)
                     {
                         try
                         {
                             
                             int numBytes = client.Receive(uploadFileBuffer);
+                            numBytesRead += numBytes;
                             //string income = Encoding.Default.GetString(uploadFileBuffer);
                             int index = Array.FindIndex(uploadFileBuffer, checkEnd);
                             //data = Encoding.ASCII.GetString(uploadFileBuffer, 0, numBytes);
+                            //logBox.AppendText(numBytes.ToString());
                             if (index > -1)
                             {
                                 uploadFile.Write(uploadFileBuffer, 0, index);
@@ -294,17 +321,17 @@ namespace Server
                             }
                             else
                             {
+                                
                                 uploadFile.Write(uploadFileBuffer, 0, numBytes);
                             }
                         }
                         catch
                         {
                             logBox.AppendText("ERROR: During File Upload\n");
+                            uploadFile.Close();
                             fileUploadError = false;
                             break;
-                        }
-                        
-                        
+                        }          
                     }
                     uploadFile.Close();
                     if (fileUploadError)
