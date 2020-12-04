@@ -21,7 +21,7 @@ namespace Server
     {
         
         int portNum;
-        int MAX_CLIENT = 20;
+        int MAX_CLIENT = 128;
         int MAX_BUF = (2 << 22);
         bool listening;
         string fileDirectory = "";
