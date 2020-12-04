@@ -66,7 +66,7 @@ namespace Server
             }
             catch (FormatException except)
             {
-                logBox.AppendText($"ERROR not a valid number: '{portNum}' \n");
+                logBox.AppendText($"ERROR: port number is not a valid number\n");
                 input_check = false;
             }
 
@@ -138,6 +138,7 @@ namespace Server
                 }
                 portBox.Text = "";
                 fileBox.Text = "";
+                fileDirectory = "";
                 portBox.Enabled = true;
                 fileBox.Enabled = true;
             }
@@ -276,7 +277,7 @@ namespace Server
                 logBox.AppendText("Client: " + commandMessage + "\n");
                 if (command == "UPLOAD")
                 {
-                    int? count = Program.GetIncCountByName(filename);
+                    int? count = Program.GetIncCountByName(username+filename);
                     count = count == null ? 0 : count+1;
                     /*
                     if (count == null)
@@ -289,7 +290,7 @@ namespace Server
                     }
                     */
                     
-                    string tempFileName = username + filename + "." + count.ToString();
+                    string tempFileName = count.ToString() + "." + username + "." +filename;
                     FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
                     Byte[] uploadFileBuffer = new Byte[MAX_BUF];
 
@@ -363,11 +364,11 @@ namespace Server
                     {
                         if (count == 0)
                         {
-                            Program.InsertFile(filename, fileDirectory, username, File1.AccessType.PRIVATE);
+                            Program.InsertFile(username+filename, fileDirectory, username, File1.AccessType.PRIVATE);
                         }
                         else
                         {
-                            Program.IncrementFileCount(filename);
+                            Program.IncrementFileCount(username+filename);
                         }
 
                         //List<File1> files = Program.GetAllFiles();
