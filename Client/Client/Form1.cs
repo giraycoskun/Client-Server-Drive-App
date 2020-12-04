@@ -194,38 +194,44 @@ namespace Client
         private void uploadButton_Click(object sender, EventArgs e)
         {
             bool connection = false;
-            try
-            {
-                connection = checkConnection(clientSocket);
-            }
-            catch(Exception except)
+            if (clientSocket == null)
             {
                 outputBox.AppendText("Cannot upload without connection\n");
             }
-
-            if (connection)
+            else
             {
-                uploadFileBox.Enabled = false;
-                filepath = uploadFileBox.Text;
-                if (!File.Exists(filepath))
+                try
                 {
-                    outputBox.AppendText("ERROR: File Does Not Exist\n");
-                    uploadFileBox.Text = "";
-                    uploadFileBox.Enabled = true;
+                    connection = checkConnection(clientSocket);
+                }
+                catch (Exception except)
+                {
+                    outputBox.AppendText("Cannot upload without connection\n");
+                }
+
+                if (connection)
+                {
+                    uploadFileBox.Enabled = false;
+                    filepath = uploadFileBox.Text;
+                    if (!File.Exists(filepath))
+                    {
+                        outputBox.AppendText("ERROR: File Does Not Exist\n");
+                        uploadFileBox.Text = "";
+                        uploadFileBox.Enabled = true;
+                    }
+                    else
+                    {
+                        uploadFile(filepath);
+                        uploadFileBox.Enabled = true;
+                    }
                 }
                 else
                 {
-                    uploadFile(filepath);
-                    uploadFileBox.Enabled = true;
+                    outputBox.AppendText("ERROR: NOT CONNECTED\n");
+                    enableInputBoxes();
+                    clientSocket.Close();
                 }
             }
-            else
-            {
-                outputBox.AppendText("ERROR: NOT CONNECTED\n");
-                enableInputBoxes();
-                clientSocket.Close();
-            }
-            
         }
 
         private void enableInputBoxes()
