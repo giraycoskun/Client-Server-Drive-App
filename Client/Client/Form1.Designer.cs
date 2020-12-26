@@ -47,9 +47,10 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(411, 9);
+            this.label1.Location = new System.Drawing.Point(274, 6);
+            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 20);
+            this.label1.Size = new System.Drawing.Size(45, 13);
             this.label1.TabIndex = 0;
             this.label1.Text = "CLIENT";
             this.label1.Click += new System.EventHandler(this.label1_Click);
@@ -57,9 +58,10 @@
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(40, 73);
+            this.label2.Location = new System.Drawing.Point(27, 47);
+            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(78, 20);
+            this.label2.Size = new System.Drawing.Size(54, 13);
             this.label2.TabIndex = 1;
             this.label2.Text = "Server IP:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.BottomRight;
@@ -68,41 +70,46 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(42, 126);
+            this.label3.Location = new System.Drawing.Point(28, 82);
+            this.label3.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(102, 20);
+            this.label3.Size = new System.Drawing.Size(69, 13);
             this.label3.TabIndex = 2;
             this.label3.Text = "Port Number:";
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // outputBox
             // 
-            this.outputBox.Location = new System.Drawing.Point(458, 48);
+            this.outputBox.Location = new System.Drawing.Point(305, 31);
+            this.outputBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.outputBox.Name = "outputBox";
-            this.outputBox.Size = new System.Drawing.Size(347, 502);
+            this.outputBox.Size = new System.Drawing.Size(233, 328);
             this.outputBox.TabIndex = 3;
             this.outputBox.Text = "";
             // 
             // ipBox
             // 
-            this.ipBox.Location = new System.Drawing.Point(203, 73);
+            this.ipBox.Location = new System.Drawing.Point(135, 47);
+            this.ipBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.ipBox.Name = "ipBox";
-            this.ipBox.Size = new System.Drawing.Size(201, 26);
+            this.ipBox.Size = new System.Drawing.Size(135, 20);
             this.ipBox.TabIndex = 4;
             this.ipBox.TextChanged += new System.EventHandler(this.ipBox_TextChanged);
             // 
             // portBox
             // 
-            this.portBox.Location = new System.Drawing.Point(202, 120);
+            this.portBox.Location = new System.Drawing.Point(135, 78);
+            this.portBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.portBox.Name = "portBox";
-            this.portBox.Size = new System.Drawing.Size(201, 26);
+            this.portBox.Size = new System.Drawing.Size(135, 20);
             this.portBox.TabIndex = 5;
             // 
             // connectButton
             // 
-            this.connectButton.Location = new System.Drawing.Point(46, 247);
+            this.connectButton.Location = new System.Drawing.Point(31, 161);
+            this.connectButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.connectButton.Name = "connectButton";
-            this.connectButton.Size = new System.Drawing.Size(182, 45);
+            this.connectButton.Size = new System.Drawing.Size(121, 29);
             this.connectButton.TabIndex = 6;
             this.connectButton.Text = "CONNECT";
             this.connectButton.UseVisualStyleBackColor = true;
@@ -110,9 +117,10 @@
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(253, 247);
+            this.stopButton.Location = new System.Drawing.Point(169, 161);
+            this.stopButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(182, 43);
+            this.stopButton.Size = new System.Drawing.Size(121, 28);
             this.stopButton.TabIndex = 7;
             this.stopButton.Text = "STOP";
             this.stopButton.UseVisualStyleBackColor = true;
@@ -120,33 +128,37 @@
             // 
             // usernameBox
             // 
-            this.usernameBox.Location = new System.Drawing.Point(198, 162);
+            this.usernameBox.Location = new System.Drawing.Point(132, 105);
+            this.usernameBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.usernameBox.Name = "usernameBox";
-            this.usernameBox.Size = new System.Drawing.Size(205, 26);
+            this.usernameBox.Size = new System.Drawing.Size(138, 20);
             this.usernameBox.TabIndex = 8;
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(42, 171);
+            this.label4.Location = new System.Drawing.Point(28, 111);
+            this.label4.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(83, 20);
+            this.label4.Size = new System.Drawing.Size(55, 13);
             this.label4.TabIndex = 9;
             this.label4.Text = "Username";
             // 
             // uploadFileBox
             // 
-            this.uploadFileBox.Location = new System.Drawing.Point(166, 392);
+            this.uploadFileBox.Location = new System.Drawing.Point(111, 255);
+            this.uploadFileBox.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.uploadFileBox.Name = "uploadFileBox";
-            this.uploadFileBox.Size = new System.Drawing.Size(181, 26);
+            this.uploadFileBox.Size = new System.Drawing.Size(122, 20);
             this.uploadFileBox.TabIndex = 11;
             this.uploadFileBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // browseButton
             // 
-            this.browseButton.Location = new System.Drawing.Point(40, 386);
+            this.browseButton.Location = new System.Drawing.Point(27, 251);
+            this.browseButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.browseButton.Name = "browseButton";
-            this.browseButton.Size = new System.Drawing.Size(104, 39);
+            this.browseButton.Size = new System.Drawing.Size(69, 25);
             this.browseButton.TabIndex = 12;
             this.browseButton.Text = "browse";
             this.browseButton.UseVisualStyleBackColor = true;
@@ -159,9 +171,10 @@
             // 
             // uploadButton
             // 
-            this.uploadButton.Location = new System.Drawing.Point(139, 431);
+            this.uploadButton.Location = new System.Drawing.Point(93, 280);
+            this.uploadButton.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.uploadButton.Name = "uploadButton";
-            this.uploadButton.Size = new System.Drawing.Size(137, 38);
+            this.uploadButton.Size = new System.Drawing.Size(91, 25);
             this.uploadButton.TabIndex = 13;
             this.uploadButton.Text = "UPLOAD";
             this.uploadButton.UseVisualStyleBackColor = true;
@@ -169,9 +182,9 @@
             // 
             // CLIENT
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(838, 619);
+            this.ClientSize = new System.Drawing.Size(559, 402);
             this.Controls.Add(this.uploadButton);
             this.Controls.Add(this.browseButton);
             this.Controls.Add(this.uploadFileBox);
@@ -185,6 +198,7 @@
             this.Controls.Add(this.label3);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
+            this.Margin = new System.Windows.Forms.Padding(2, 2, 2, 2);
             this.Name = "CLIENT";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.CLIENT_Load);

@@ -16,7 +16,7 @@ namespace Client
 {
     public partial class CLIENT : Form
     {
-        int MAX_BUF = (2 << 22);
+        int MAX_BUF = (2 << 20);
         IPAddress serverIPAddress;
         int serverPortNum;
         //bool sendFilePermit = false;
@@ -255,6 +255,7 @@ namespace Client
             Array.Resize(ref commandBuffer, 64);
             clientSocket.Send(commandBuffer);
 
+            //TODO: ACK
             
             Byte[] uploadBuffer = new Byte[MAX_BUF];
             try
@@ -283,12 +284,8 @@ namespace Client
                         // Read may return anything from 0 to numBytesToRead.
                         n = fsSource.Read(uploadBuffer, 0, MAX_BUF);
 
-                        temp = clientSocket.Send(uploadBuffer);
-
+                        temp = clientSocket.Send(uploadBuffer, n, SocketFlags.None);
                         // Break when the end of the file is reached.
-
-                        if (n == 0)
-                            break;
 
                         numBytesRead += (ulong)n;
                         numBytesToRead -= (ulong)n;

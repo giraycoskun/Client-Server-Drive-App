@@ -38,10 +38,13 @@ C:\Users\HP\Documents\CS 408 Project\Server\Server\bin\Debug\K4os.Compression.LZ
 C:\Users\HP\Documents\CS 408 Project\Server\Server\bin\Debug\K4os.Hash.xxHash.dll
 C:\Users\HP\Documents\CS 408 Project\Server\Server\bin\Debug\System.Runtime.CompilerServices.Unsafe.dll
 C:\Users\HP\Documents\CS 408 Project\Server\Server\bin\Debug\MySql.Data.xml
-C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csproj.Server.exe.config
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.Form1.resources
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.Properties.Resources.resources
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csproj.GenerateResource.Cache
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.exe
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.pdb
-C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csprojResolveAssemblyReference.cache
+C:\Users\HP\Documents\CS 408 Project\Server\Server\bin\Debug\System.Memory.dll
+C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csprojAssemblyReference.cache
+C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.exe.config
+C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
+C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csproj.CopyComplete
