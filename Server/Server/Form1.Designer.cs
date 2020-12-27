@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.label1 = new System.Windows.Forms.Label();
             this.portBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
@@ -40,104 +41,134 @@
             this.chooseButton = new System.Windows.Forms.Button();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.fontDialog1 = new System.Windows.Forms.FontDialog();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(96, 9);
+            this.label1.BackColor = System.Drawing.Color.Transparent;
+            this.label1.Font = new System.Drawing.Font("Segoe Print", 14F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label1.Location = new System.Drawing.Point(208, 71);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(77, 20);
+            this.label1.Size = new System.Drawing.Size(138, 49);
             this.label1.TabIndex = 0;
             this.label1.Text = "SERVER";
             // 
             // portBox
             // 
-            this.portBox.Location = new System.Drawing.Point(168, 87);
+            this.portBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.portBox.Location = new System.Drawing.Point(157, 165);
             this.portBox.Name = "portBox";
-            this.portBox.Size = new System.Drawing.Size(187, 26);
+            this.portBox.Size = new System.Drawing.Size(244, 30);
             this.portBox.TabIndex = 1;
             this.portBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label2
             // 
             this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(28, 87);
+            this.label2.Font = new System.Drawing.Font("Times New Roman", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label2.Location = new System.Drawing.Point(28, 176);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(42, 20);
+            this.label2.Size = new System.Drawing.Size(42, 19);
             this.label2.TabIndex = 2;
             this.label2.Text = "Port:";
             // 
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(22, 222);
+            this.label3.BackColor = System.Drawing.Color.Snow;
+            this.label3.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label3.Location = new System.Drawing.Point(28, 329);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(48, 20);
+            this.label3.Size = new System.Drawing.Size(51, 23);
             this.label3.TabIndex = 3;
-            this.label3.Text = "Logs:";
+            this.label3.Text = "Logs";
             this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // logBox
             // 
-            this.logBox.Location = new System.Drawing.Point(32, 277);
+            this.logBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.logBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.logBox.Location = new System.Drawing.Point(32, 355);
             this.logBox.Name = "logBox";
-            this.logBox.Size = new System.Drawing.Size(720, 307);
+            this.logBox.ReadOnly = true;
+            this.logBox.Size = new System.Drawing.Size(533, 439);
             this.logBox.TabIndex = 4;
             this.logBox.Text = "";
             // 
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(31, 148);
+            this.label4.Font = new System.Drawing.Font("Times New Roman", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.label4.Location = new System.Drawing.Point(28, 214);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(105, 20);
+            this.label4.Size = new System.Drawing.Size(107, 19);
             this.label4.TabIndex = 5;
             this.label4.Text = "File Directory:";
             // 
             // fileBox
             // 
-            this.fileBox.Location = new System.Drawing.Point(167, 149);
+            this.fileBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.fileBox.Location = new System.Drawing.Point(157, 206);
             this.fileBox.Name = "fileBox";
-            this.fileBox.Size = new System.Drawing.Size(187, 26);
+            this.fileBox.Size = new System.Drawing.Size(244, 30);
             this.fileBox.TabIndex = 6;
             this.fileBox.TextChanged += new System.EventHandler(this.fileBox_TextChanged);
             // 
             // startButton
             // 
-            this.startButton.Location = new System.Drawing.Point(511, 79);
+            this.startButton.BackColor = System.Drawing.Color.Cornsilk;
+            this.startButton.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.startButton.Location = new System.Drawing.Point(109, 272);
             this.startButton.Name = "startButton";
-            this.startButton.Size = new System.Drawing.Size(231, 34);
+            this.startButton.Size = new System.Drawing.Size(167, 46);
             this.startButton.TabIndex = 7;
             this.startButton.Text = "START";
-            this.startButton.UseVisualStyleBackColor = true;
+            this.startButton.UseVisualStyleBackColor = false;
             this.startButton.Click += new System.EventHandler(this.startButton_Click);
             // 
             // stopButton
             // 
-            this.stopButton.Location = new System.Drawing.Point(513, 142);
+            this.stopButton.BackColor = System.Drawing.Color.Cornsilk;
+            this.stopButton.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.stopButton.Location = new System.Drawing.Point(311, 272);
             this.stopButton.Name = "stopButton";
-            this.stopButton.Size = new System.Drawing.Size(229, 32);
+            this.stopButton.Size = new System.Drawing.Size(167, 46);
             this.stopButton.TabIndex = 8;
             this.stopButton.Text = "STOP";
-            this.stopButton.UseVisualStyleBackColor = true;
+            this.stopButton.UseVisualStyleBackColor = false;
             this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
             // 
             // chooseButton
             // 
-            this.chooseButton.Location = new System.Drawing.Point(360, 146);
+            this.chooseButton.BackColor = System.Drawing.Color.Cornsilk;
+            this.chooseButton.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.chooseButton.Location = new System.Drawing.Point(438, 202);
             this.chooseButton.Name = "chooseButton";
-            this.chooseButton.Size = new System.Drawing.Size(85, 33);
+            this.chooseButton.Size = new System.Drawing.Size(116, 36);
             this.chooseButton.TabIndex = 9;
             this.chooseButton.Text = "Choose";
-            this.chooseButton.UseVisualStyleBackColor = true;
+            this.chooseButton.UseVisualStyleBackColor = false;
             this.chooseButton.Click += new System.EventHandler(this.browseButton_Click);
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox1.Image")));
+            this.pictureBox1.Location = new System.Drawing.Point(175, 12);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(205, 113);
+            this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pictureBox1.TabIndex = 10;
+            this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(921, 643);
+            this.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.ClientSize = new System.Drawing.Size(601, 806);
             this.Controls.Add(this.chooseButton);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);
@@ -148,11 +179,15 @@
             this.Controls.Add(this.label2);
             this.Controls.Add(this.portBox);
             this.Controls.Add(this.label1);
+            this.Controls.Add(this.pictureBox1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.Text = "Form1";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.Text = "Server";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -172,6 +207,7 @@
         private System.Windows.Forms.Button chooseButton;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.FontDialog fontDialog1;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 
