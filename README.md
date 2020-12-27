@@ -188,4 +188,4 @@ UNIQUE (filename, owner)
 ### Client Screen
 ![Client Screen](./client_screen.JPG)
 ### Server Screen
-![Server Screen](./server_screen.jpg)
+![Server Screen](./server_screen.JPG)
