@@ -1,22 +1,17 @@
 ﻿using System;
-using System.IO;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Client
 {
     public partial class CLIENT : Form
     {
-        int MAX_BUF = (2 << 20);
+        int MAX_BUF = (2 << 22);
         IPAddress serverIPAddress;
         int serverPortNum;
         //bool sendFilePermit = false;
@@ -24,7 +19,10 @@ namespace Client
         string filepath;
         bool connected = false;
         Socket clientSocket;
-        
+        string DOWNLOAD_DIR = "";
+        bool ACK_CHECK = false;
+
+        private static ManualResetEvent mre = new ManualResetEvent(false);
         public CLIENT()
         {
             InitializeComponent();
@@ -61,9 +59,10 @@ namespace Client
             ipBox.Enabled = false;
             portBox.Enabled = false;
             usernameBox.Enabled = false;
-            string ipBoxText= ipBox.Text;
+            string ipBoxText = ipBox.Text;
             bool inputCheck = true;
             username = usernameBox.Text;
+
             //TODO: Input Check
             try
             {
@@ -78,7 +77,7 @@ namespace Client
                 inputCheck = false;
             }
 
-            if (inputCheck && username != "" && ipBoxText != "" )
+            if (inputCheck && username != "" && ipBoxText != "")
             {
 
                 try
@@ -133,7 +132,7 @@ namespace Client
                     connected = false;
                     clientSocket.Close();
                     enableInputBoxes();
-                    
+
                 }
             }
             else
@@ -156,7 +155,7 @@ namespace Client
                     //usernameBox.Enabled = true;
                     connected = false;
                     clientSocket.Close();
-                    
+
                     outputBox.AppendText($"Connection STOPPED by client\n");
                 }
                 catch (Exception except)
@@ -168,7 +167,7 @@ namespace Client
             else
             {
                 outputBox.AppendText("ERROR: not connected\n");
-            }            
+            }
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -185,7 +184,6 @@ namespace Client
             openFileDialog1.ShowDialog();
             uploadFileBox.Text = openFileDialog1.FileName;
         }
-
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
 
@@ -236,7 +234,7 @@ namespace Client
 
         private void enableInputBoxes()
         {
-            if(ipBox.InvokeRequired || portBox.InvokeRequired || usernameBox.InvokeRequired)
+            if (ipBox.InvokeRequired || portBox.InvokeRequired || usernameBox.InvokeRequired)
             {
                 ipBox.BeginInvoke(new Action(delegate { enableInputBoxes(); }));
                 return;
@@ -256,13 +254,14 @@ namespace Client
             clientSocket.Send(commandBuffer);
 
             //TODO: ACK
-            
+            mre.WaitOne();
+
             Byte[] uploadBuffer = new Byte[MAX_BUF];
             try
             {
 
                 //clientSocket.SendFile(filepath);
-               // StreamReader sr = new StreamReader("TestFile.txt")
+                // StreamReader sr = new StreamReader("TestFile.txt")
                 using (FileStream fsSource = new FileStream(filepath, FileMode.Open, FileAccess.Read))
                 {
 
@@ -274,13 +273,13 @@ namespace Client
                     Array.Resize(ref fileSizeBuffer, 64);
                     clientSocket.Send(fileSizeBuffer);
 
-                    
+
                     ulong numBytesRead = 0;
                     int n, temp;
 
                     while (numBytesToRead > 0)
                     {
-                        
+
                         // Read may return anything from 0 to numBytesToRead.
                         n = fsSource.Read(uploadBuffer, 0, MAX_BUF);
 
@@ -289,18 +288,12 @@ namespace Client
 
                         numBytesRead += (ulong)n;
                         numBytesToRead -= (ulong)n;
-                        
+
                     }
                 }
-                
-                /*
-                if(!getServerMessage())
-                {
-                    throw new System.InvalidOperationException("Logfile cannot be read-only");
-                }
-                */
+
             }
-            catch(Exception except)
+            catch (Exception except)
             {
                 outputBox.AppendText("Error: during file sending.\n");
                 outputBox.AppendText("Connection STOPPED \n");
@@ -311,40 +304,7 @@ namespace Client
 
             }
             safeLogWrite("File Sending is finished!!\n");
-            
 
-            /*
-            string filePath = "";
-            /* File reading operation. */
-            /*
-            Console.WriteLine(fileName);
-            fileName = fileName.Replace("\\", "/");
-            while (fileName.IndexOf("/") > -1)
-            {
-                filePath += fileName.Substring(0, fileName.IndexOf("/") + 1);
-                fileName = fileName.Substring(fileName.IndexOf("/") + 1);
-            }
-            byte[] fileNameByte = Encoding.ASCII.GetBytes(fileName);
-      
-           //TODO
-            byte[] fileData = File.ReadAllBytes(filePath + fileName);
-            /* Read & store file byte data in byte array. */
-            /*
-            byte[] clientData = new byte[4 + fileNameByte.Length + fileData.Length];
-            /* clientData will store complete bytes which will store file name length, 
-            file name & file data. */
-            /*
-            byte[] fileNameLen = BitConverter.GetBytes(fileNameByte.Length);
-            /* File name length’s binary data. */
-            /*
-            fileNameLen.CopyTo(clientData, 0);
-            fileNameByte.CopyTo(clientData, 4);
-            fileData.CopyTo(clientData, 4 + fileNameByte.Length);
-            /* copy these bytes to a variable with format line [file name length]
-            [file name] [ file content] */
-
-
-            //clientSocket.Send(clientData);
         }
 
         private void listenServer()
@@ -361,16 +321,43 @@ namespace Client
                     incomingMessage = incomingMessage.TrimEnd('\0');
                     if (incomingMessage != "")
                     {
+                        
+                        if (incomingMessage.Contains("ACK"))
+                        {
+                            ACK_CHECK = true;
+                            mre.Set();
+
+                        }
+                        
+                        if(incomingMessage.Contains("ERR"))
+                        {
+                            ACK_CHECK = false;
+                            mre.Set();
+                        }
+
                         string text = "Server: " + incomingMessage + "\n";
                         safeLogWrite(text);
+
+                        if(incomingMessage.Contains("DOWNLOAD") && ACK_CHECK)
+                        {
+                            string filename = incomingMessage.Split()[2];
+                            downloadFile(filename, DOWNLOAD_DIR);
+                        }
+                        else if(incomingMessage.Contains("GET") && ACK_CHECK)
+                        {
+                            //TODO
+                        }
+
                     }
                     else
                     {
+                        //outputBox.AppendText("Empty String \n");
                         throw new System.InvalidOperationException("Empty String Received");
                     }
                 }
                 catch
                 {
+                    //mre.Set();
                     //outputBox.AppendText("Connection STOPPED \n");
                     if (connected)
                     {
@@ -419,12 +406,171 @@ namespace Client
         {
             if (outputBox.InvokeRequired)
             {
-                outputBox.BeginInvoke(new Action(delegate {
+                outputBox.BeginInvoke(new Action(delegate
+                {
                     safeLogWrite(EventText);
                 }));
                 return;
             }
-            outputBox.AppendText(EventText);          
+            outputBox.AppendText(EventText);
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void downloadButton_Click(object sender, EventArgs e)
+        {
+            bool connection = false;
+            if (clientSocket == null)
+            {
+                outputBox.AppendText("Cannot upload without connection\n");
+            }
+            else
+            {
+                try
+                {
+                    connection = checkConnection(clientSocket);
+                }
+                catch (Exception except)
+                {
+                    outputBox.AppendText("Cannot upload without connection\n");
+                }
+
+                if (connection)
+                {
+                    uploadFileBox.Enabled = false;
+                    string downloadFilename = uploadFileBox.Text;
+                    filepath = DOWNLOAD_DIR;
+
+                    if (DOWNLOAD_DIR != "")
+                    {
+                        //TODO:
+                        string commandMessage = "DOWNLOAD" + " " + downloadFilename;
+                        Byte[] commandBuffer = new Byte[64];
+                        commandBuffer = Encoding.Default.GetBytes(commandMessage);
+                        Array.Resize(ref commandBuffer, 64);
+                        clientSocket.Send(commandBuffer);
+                    }
+                    else
+                    {
+                        outputBox.AppendText("ERROR:Download Directory is not set \n");
+                    }
+
+                    uploadFileBox.Enabled = true;
+                }
+                else
+                {
+                    outputBox.AppendText("ERROR: NOT CONNECTED\n");
+                    enableInputBoxes();
+                    clientSocket.Close();
+                }
+            }
+        }
+
+        private bool downloadFile(string filename, string downloadDirectory)
+        {
+            bool fileDownloadError = true;
+            bool result = true;
+
+            FileStream downloadFile = File.Create(Path.Combine(downloadDirectory, filename));
+            Byte[] downloadFileBuffer = new Byte[MAX_BUF];
+
+            while (true)
+            {
+                try
+                {
+                    Array.Clear(downloadFileBuffer, 0, MAX_BUF);
+                    int numBytes = clientSocket.Receive(downloadFileBuffer);
+                    int index = Array.FindIndex(downloadFileBuffer, checkEnd);
+
+                    if (index > -1)
+                    {
+                        downloadFile.Write(downloadFileBuffer, 0, index);
+                        break;
+                    }
+                    else
+                    {
+                        downloadFile.Write(downloadFileBuffer, 0, numBytes);
+                    }
+                }
+                catch
+                {
+                    outputBox.AppendText("ERROR: During File Download\n");
+                    downloadFile.Close();
+                    fileDownloadError = false;
+                    break;
+                }
+            }
+            downloadFile.Close();
+
+            if (fileDownloadError)
+            {
+                string output = $"File {filename} Downloaded\n";
+                safeLogWrite(output);
+                string message = filename + " Received";
+                sendServerMessage(clientSocket, message);
+            }
+            else
+            {
+                outputBox.AppendText($"File {filename} Could Not Downloaded\n");
+                result = false;
+            }
+
+            return result;
+        }
+
+        private bool checkEnd(Byte b)
+        {
+            if (b == '\0')
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        private void sendServerMessage(Socket server, string message)
+        {
+            try
+            {
+                Byte[] buffer = Encoding.Default.GetBytes(message);
+                server.Send(buffer);
+            }
+            catch
+            {
+                outputBox.AppendText($"ERROR: message to client: {message} not sent\n");
+            }
+        }
+
+        private void browseFolderButton_Click(object sender, EventArgs e)
+        {
+            string temp = "";
+            downloadFolderBox.Enabled = true;
+            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            {
+                downloadFolderBox.Text = folderBrowserDialog1.SelectedPath;
+                temp = downloadFolderBox.Text;
+            }
+            if (Directory.Exists(temp))
+            {
+                DOWNLOAD_DIR = temp;
+                outputBox.AppendText($"DOWNLOAD DIRECTORY: {DOWNLOAD_DIR} \n");
+                downloadFolderBox.Enabled = false;
+            }
+            else
+            {
+                outputBox.AppendText("ERROR: path does not exist \n");
+                DOWNLOAD_DIR = "";
+            }
         }
     }
 }
