@@ -232,7 +232,7 @@ namespace Server
             {
                 logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!\n");
             }
-            bool fileUploadError = true;
+            
             while(checkConnection(client))
             {
                 string commandMessage = "";
@@ -245,10 +245,17 @@ namespace Server
                     int temp = client.Receive(commandBuffer);
                     commandMessage = Encoding.Default.GetString(commandBuffer);
                     commandMessage = commandMessage.TrimEnd('\0');
-                    //UPLOAD filename
-                    //DELETE filename
-                    //DOWNLOAD filename
-                    //CH_ACCESS filename
+                    /*
+                    UPLOAD <filename>
+                    DOWNLOAD <filename>
+                    COPY <filename>
+                    GETFILE ME
+                    GETFILE PUBLIC
+                    DELETE <filename>
+                    CH_ACCESS <filename>
+
+                    send command ACK|ERR -> DO COMMAND -> get client ACK
+                    */
                     command = "";
                     filename = "";
                       
@@ -265,150 +272,27 @@ namespace Server
 
                 if (command == "UPLOAD")
                 {
-                    string ackMessage = "ACK UPLOAD" + commandMessage;
-                    sendClientMessage(client, ackMessage);
-
-                    int? count = Program.GetIncCountByName(username+filename);
-                    count = count == null ? 0 : count+1;
-                    
-                    string tempFileName = count.ToString() + "." + username + "." +filename;
-                    FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
-                    Byte[] uploadFileBuffer = new Byte[MAX_BUF];
-
-                    Byte[] fileSizeBuffer = new Byte[64];
-                    try
+                    bool result = uploadCommand(client, commandMessage, username, filename);
+                    if(! result)
                     {
-                        int temp = client.Receive(fileSizeBuffer);
-                    }
-                    catch
-                    {
-                        logBox.AppendText("ERROR: During File Upload\n");
-                        fileUploadError = false;
-                        uploadFile.Close();
                         break;
-                    }
-                    
-                    ulong fileSize = BitConverter.ToUInt64(fileSizeBuffer, 0);
-                    ulong numBytesRead = 0;
-
-                    //sendClientMessage(client, "ACK");
-                    while (fileSize > numBytesRead)
-                    {
-                        if (fileSize == numBytesRead)
-                            logBox.AppendText("DEBUG");
-                        try
-                        {
-                            
-                            int numBytes = client.Receive(uploadFileBuffer);
-                            numBytesRead += (ulong)numBytes;
-                            
-                            int index = Array.FindIndex(uploadFileBuffer, checkEnd);
-                            
-                            if (index > -1)
-                            {
-                                uploadFile.Write(uploadFileBuffer, 0, index);
-                                break;
-                            }
-                            else
-                            {
-                                
-                                uploadFile.Write(uploadFileBuffer, 0, numBytes);
-                            }                         
-                        }
-                        catch
-                        {
-                            logBox.AppendText("ERROR: During File Upload\n");
-                            uploadFile.Close();
-                            fileUploadError = false;
-                            break;
-                        }          
-                    }
-                    uploadFile.Close();
-                    
-                    if (fileUploadError)
-                    {
-                        if (count == 0)
-                        {
-                            Program.InsertFile(username+filename, fileDirectory, username, File1.AccessType.PRIVATE);
-                        }
-                        else
-                        {
-                            Program.IncrementFileCount(username+filename);
-                        }
-                        logBox.AppendText($"File {tempFileName} UPLOADED\n");
-                        string message = filename + " UPLOADED";
-                        sendClientMessage(client, message);
-                    }
-                    
+                    }                   
                 }
                 else if(command == "DOWNLOAD")
                 {
-                    //command - filename
-                    //receive file -> receive client ACK
-                    string ackMessage;
-                    bool checkFileValid = checkFileValidity(username, filename);
-                    if(checkFileValid)
+                    bool result = downloadCommand(client, commandMessage, username, filename);
+                    if (!result)
                     {
-                        string absoulteFileName = getAbsoluteFilename(username, filename);
-
-                        ackMessage = "ACK DOWNLOAD " + filename;
-                        sendClientMessage(client, ackMessage);
-
-                        Byte[] downloadBuffer = new Byte[MAX_BUF];
-                        try
-                        {
-
-                            //clientSocket.SendFile(filepath);
-                            // StreamReader sr = new StreamReader("TestFile.txt")
-                            using (FileStream fsSource = new FileStream(absoulteFileName, FileMode.Open, FileAccess.Read))
-                            {
-                                int n, temp;
-
-                                while (true)
-                                {         
-                                    // Read may return anything from 0 to numBytesToRead.
-                                    n = fsSource.Read(downloadBuffer, 0, MAX_BUF);
-
-                                    temp = client.Send(downloadBuffer, n, SocketFlags.None);
-                                    // Break when the end of the file is reached.
-
-                                    if (n == 0)
-                                        break;
-
-                                        //numBytesRead += (ulong)n;
-                                        //numBytesToRead -= (ulong)n;
-
-                                }
-                            }
-                            logBox.AppendText("Server: File Sending Finished\n");
-                            Byte[] clientAckBuffer = new Byte[64];
-                            int clientAckN = client.Receive(clientAckBuffer);
-                            string clientAckMessage = Encoding.Default.GetString(clientAckBuffer);
-                            clientAckMessage = clientAckMessage.TrimEnd('\0');
-                            logBox.AppendText(clientAckMessage + "\n");
-                        }
-                        catch (Exception except)
-                        {
-                            logBox.AppendText("Error: during file sending.\n");
-                            logBox.AppendText("Connection STOPPED \n");
-                            client.Close();
-                            break;
-
-                        }
+                        break;
                     }
-                    else
-                    {
-                        ackMessage = "ERR" + filename;
-                        sendClientMessage(client, ackMessage);
-                    }
-                   
-
-                    
-
                 }
                 else if(command == "DELETE")
                 { }
-                else if(command == "CH_ACCESS")
+                else if(command == "COPY")
+                { }
+                else if (command == "GETFILE")
+                { }
+                else if (command == "CH_ACCESS")
                 { }
                 else
                 {
@@ -420,6 +304,148 @@ namespace Server
             clientSocketList.Remove(client);
         }
 
+        private bool uploadCommand(Socket client, string commandMessage, string username, string filename)
+        {
+            bool fileUploadError = true;
+            string ackMessage = "ACK " + commandMessage;
+            sendClientMessage(client, ackMessage);
+
+            int? count = Program.GetIncCountByName(username + filename);
+            count = count == null ? 0 : count + 1;
+
+            string tempFileName = count.ToString() + "." + username + "." + filename;
+            FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
+            Byte[] uploadFileBuffer = new Byte[MAX_BUF];
+
+            Byte[] fileSizeBuffer = new Byte[64];
+            try
+            {
+                int temp = client.Receive(fileSizeBuffer);
+            }
+            catch
+            {
+                logBox.AppendText("ERROR: During File Upload\n");
+                fileUploadError = false;
+                uploadFile.Close();
+                return false;
+            }
+
+            ulong fileSize = BitConverter.ToUInt64(fileSizeBuffer, 0);
+            ulong numBytesRead = 0;
+
+            //sendClientMessage(client, "ACK");
+            while (fileSize > numBytesRead)
+            {
+                if (fileSize == numBytesRead)
+                    logBox.AppendText("DEBUG");
+                try
+                {
+
+                    int numBytes = client.Receive(uploadFileBuffer);
+                    numBytesRead += (ulong)numBytes;
+
+                    int index = Array.FindIndex(uploadFileBuffer, checkEnd);
+
+                    if (index > -1)
+                    {
+                        uploadFile.Write(uploadFileBuffer, 0, index);
+                        break;
+                    }
+                    else
+                    {
+
+                        uploadFile.Write(uploadFileBuffer, 0, numBytes);
+                    }
+                }
+                catch
+                {
+                    logBox.AppendText("ERROR: During File Upload\n");
+                    uploadFile.Close();
+                    fileUploadError = false;
+                    break;
+                }
+            }
+            uploadFile.Close();
+
+            if (fileUploadError)
+            {
+                if (count == 0)
+                {
+                    Program.InsertFile(username + filename, fileDirectory, username, File1.AccessType.PRIVATE);
+                }
+                else
+                {
+                    Program.IncrementFileCount(username + filename);
+                }
+                logBox.AppendText($"File {tempFileName} UPLOADED\n");
+                string message = filename + " UPLOADED";
+                sendClientMessage(client, message);
+            }
+            return true;
+        }
+
+        private bool downloadCommand(Socket client, string commandMessage, string username, string filename)
+        {
+            //command - filename
+            //receive file -> receive client ACK
+            string ackMessage;
+            bool checkFileValid = checkFileValidity(username, filename);
+            if (checkFileValid)
+            {
+                string absoulteFileName = getAbsoluteFilename(username, filename);
+
+                ackMessage = "ACK " + commandMessage;
+                sendClientMessage(client, ackMessage);
+
+                Byte[] downloadBuffer = new Byte[MAX_BUF];
+                try
+                {
+
+                    //clientSocket.SendFile(filepath);
+                    // StreamReader sr = new StreamReader("TestFile.txt")
+                    using (FileStream fsSource = new FileStream(absoulteFileName, FileMode.Open, FileAccess.Read))
+                    {
+                        int n, temp;
+
+                        while (true)
+                        {
+                            // Read may return anything from 0 to numBytesToRead.
+                            n = fsSource.Read(downloadBuffer, 0, MAX_BUF);
+
+                            temp = client.Send(downloadBuffer, n, SocketFlags.None);
+                            // Break when the end of the file is reached.
+
+                            if (n == 0)
+                                break;
+
+                            //numBytesRead += (ulong)n;
+                            //numBytesToRead -= (ulong)n;
+
+                        }
+                    }
+                    logBox.AppendText("Server: File Sending Finished\n");
+                    Byte[] clientAckBuffer = new Byte[64];
+                    int clientAckN = client.Receive(clientAckBuffer);
+                    string clientAckMessage = Encoding.Default.GetString(clientAckBuffer);
+                    clientAckMessage = clientAckMessage.TrimEnd('\0');
+                    logBox.AppendText("Client: "+ clientAckMessage + "\n");
+                }
+                catch (Exception except)
+                {
+                    logBox.AppendText("Error: during file sending.\n");
+                    logBox.AppendText("Connection STOPPED \n");
+                    client.Close();
+                    return false;
+
+                }
+            }
+            else
+            {
+                ackMessage = "ERR" + filename;
+                sendClientMessage(client, ackMessage);
+            }
+            return true;
+        }
         private bool checkFileValidity(string username, string filename)
         {
             //TODO: Database functionality
@@ -530,11 +556,6 @@ namespace Server
             {
                 return false;
             }
-        }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }

@@ -39,7 +39,7 @@
             this.stopButton = new System.Windows.Forms.Button();
             this.usernameBox = new System.Windows.Forms.TextBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.uploadFileBox = new System.Windows.Forms.TextBox();
+            this.fileBox = new System.Windows.Forms.TextBox();
             this.browseButton = new System.Windows.Forms.Button();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.uploadButton = new System.Windows.Forms.Button();
@@ -52,7 +52,11 @@
             this.getFileButton = new System.Windows.Forms.Button();
             this.changeAccessButton = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.myfileRadioButton = new System.Windows.Forms.RadioButton();
+            this.publicFileRadioButton = new System.Windows.Forms.RadioButton();
+            this.fileGroupBox = new System.Windows.Forms.GroupBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            this.fileGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -91,6 +95,7 @@
             // outputBox
             // 
             this.outputBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.outputBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.outputBox.Location = new System.Drawing.Point(20, 153);
             this.outputBox.Name = "outputBox";
             this.outputBox.ReadOnly = true;
@@ -101,12 +106,11 @@
             // ipBox
             // 
             this.ipBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.ipBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.ipBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
             this.ipBox.Location = new System.Drawing.Point(202, 28);
             this.ipBox.Name = "ipBox";
-            this.ipBox.Size = new System.Drawing.Size(141, 35);
+            this.ipBox.Size = new System.Drawing.Size(141, 30);
             this.ipBox.TabIndex = 4;
-            this.ipBox.TextChanged += new System.EventHandler(this.ipBox_TextChanged);
             // 
             // portBox
             // 
@@ -161,15 +165,14 @@
             this.label4.TabIndex = 9;
             this.label4.Text = "Username";
             // 
-            // uploadFileBox
+            // fileBox
             // 
-            this.uploadFileBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.uploadFileBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.uploadFileBox.Location = new System.Drawing.Point(635, 224);
-            this.uploadFileBox.Name = "uploadFileBox";
-            this.uploadFileBox.Size = new System.Drawing.Size(198, 35);
-            this.uploadFileBox.TabIndex = 11;
-            this.uploadFileBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+            this.fileBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.fileBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
+            this.fileBox.Location = new System.Drawing.Point(635, 224);
+            this.fileBox.Name = "fileBox";
+            this.fileBox.Size = new System.Drawing.Size(198, 35);
+            this.fileBox.TabIndex = 11;
             // 
             // browseButton
             // 
@@ -193,7 +196,7 @@
             this.uploadButton.BackColor = System.Drawing.SystemColors.Info;
             this.uploadButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.uploadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.uploadButton.Location = new System.Drawing.Point(601, 312);
+            this.uploadButton.Location = new System.Drawing.Point(601, 321);
             this.uploadButton.Name = "uploadButton";
             this.uploadButton.Size = new System.Drawing.Size(120, 43);
             this.uploadButton.TabIndex = 13;
@@ -226,7 +229,7 @@
             // 
             this.downloadButton.BackColor = System.Drawing.SystemColors.Info;
             this.downloadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.downloadButton.Location = new System.Drawing.Point(772, 312);
+            this.downloadButton.Location = new System.Drawing.Point(772, 321);
             this.downloadButton.Name = "downloadButton";
             this.downloadButton.Size = new System.Drawing.Size(120, 43);
             this.downloadButton.TabIndex = 17;
@@ -238,18 +241,19 @@
             // 
             this.deleteButton.BackColor = System.Drawing.SystemColors.Info;
             this.deleteButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.deleteButton.Location = new System.Drawing.Point(601, 361);
+            this.deleteButton.Location = new System.Drawing.Point(601, 370);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(120, 42);
             this.deleteButton.TabIndex = 18;
             this.deleteButton.Text = "DELETE";
             this.deleteButton.UseVisualStyleBackColor = false;
+            this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
             // 
             // copyButton
             // 
             this.copyButton.BackColor = System.Drawing.SystemColors.Info;
             this.copyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.copyButton.Location = new System.Drawing.Point(772, 361);
+            this.copyButton.Location = new System.Drawing.Point(772, 370);
             this.copyButton.Name = "copyButton";
             this.copyButton.Size = new System.Drawing.Size(120, 42);
             this.copyButton.TabIndex = 19;
@@ -261,23 +265,25 @@
             // 
             this.getFileButton.BackColor = System.Drawing.SystemColors.Info;
             this.getFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.getFileButton.Location = new System.Drawing.Point(635, 153);
+            this.getFileButton.Location = new System.Drawing.Point(635, 163);
             this.getFileButton.Name = "getFileButton";
             this.getFileButton.Size = new System.Drawing.Size(198, 46);
             this.getFileButton.TabIndex = 20;
             this.getFileButton.Text = "GET FILES";
             this.getFileButton.UseVisualStyleBackColor = false;
+            this.getFileButton.Click += new System.EventHandler(this.getFileButton_Click);
             // 
             // changeAccessButton
             // 
             this.changeAccessButton.BackColor = System.Drawing.SystemColors.Info;
             this.changeAccessButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.changeAccessButton.Location = new System.Drawing.Point(635, 409);
+            this.changeAccessButton.Location = new System.Drawing.Point(635, 418);
             this.changeAccessButton.Name = "changeAccessButton";
             this.changeAccessButton.Size = new System.Drawing.Size(198, 42);
             this.changeAccessButton.TabIndex = 21;
             this.changeAccessButton.Text = "CHANGE ACCESS";
             this.changeAccessButton.UseVisualStyleBackColor = false;
+            this.changeAccessButton.Click += new System.EventHandler(this.changeAccessButton_Click);
             // 
             // pictureBox1
             // 
@@ -289,12 +295,45 @@
             this.pictureBox1.TabIndex = 22;
             this.pictureBox1.TabStop = false;
             // 
+            // myfileRadioButton
+            // 
+            this.myfileRadioButton.AutoSize = true;
+            this.myfileRadioButton.Location = new System.Drawing.Point(8, 12);
+            this.myfileRadioButton.Name = "myfileRadioButton";
+            this.myfileRadioButton.Size = new System.Drawing.Size(87, 23);
+            this.myfileRadioButton.TabIndex = 23;
+            this.myfileRadioButton.TabStop = true;
+            this.myfileRadioButton.Text = "My Files";
+            this.myfileRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // publicFileRadioButton
+            // 
+            this.publicFileRadioButton.AutoSize = true;
+            this.publicFileRadioButton.Location = new System.Drawing.Point(8, 35);
+            this.publicFileRadioButton.Name = "publicFileRadioButton";
+            this.publicFileRadioButton.Size = new System.Drawing.Size(103, 23);
+            this.publicFileRadioButton.TabIndex = 24;
+            this.publicFileRadioButton.TabStop = true;
+            this.publicFileRadioButton.Text = "Public Files";
+            this.publicFileRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // fileGroupBox
+            // 
+            this.fileGroupBox.Controls.Add(this.publicFileRadioButton);
+            this.fileGroupBox.Controls.Add(this.myfileRadioButton);
+            this.fileGroupBox.Location = new System.Drawing.Point(832, 151);
+            this.fileGroupBox.Name = "fileGroupBox";
+            this.fileGroupBox.Size = new System.Drawing.Size(116, 73);
+            this.fileGroupBox.TabIndex = 25;
+            this.fileGroupBox.TabStop = false;
+            // 
             // CLIENT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ClientSize = new System.Drawing.Size(930, 599);
+            this.ClientSize = new System.Drawing.Size(956, 599);
+            this.Controls.Add(this.fileGroupBox);
             this.Controls.Add(this.changeAccessButton);
             this.Controls.Add(this.getFileButton);
             this.Controls.Add(this.copyButton);
@@ -304,7 +343,7 @@
             this.Controls.Add(this.downloadFolderBox);
             this.Controls.Add(this.uploadButton);
             this.Controls.Add(this.browseButton);
-            this.Controls.Add(this.uploadFileBox);
+            this.Controls.Add(this.fileBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.usernameBox);
             this.Controls.Add(this.stopButton);
@@ -321,8 +360,9 @@
             this.Name = "CLIENT";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "CLIENT";
-            this.Load += new System.EventHandler(this.CLIENT_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            this.fileGroupBox.ResumeLayout(false);
+            this.fileGroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -340,7 +380,7 @@
         private System.Windows.Forms.Button stopButton;
         private System.Windows.Forms.TextBox usernameBox;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox uploadFileBox;
+        private System.Windows.Forms.TextBox fileBox;
         private System.Windows.Forms.Button browseButton;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Button uploadButton;
@@ -353,6 +393,9 @@
         private System.Windows.Forms.Button getFileButton;
         private System.Windows.Forms.Button changeAccessButton;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.RadioButton myfileRadioButton;
+        private System.Windows.Forms.RadioButton publicFileRadioButton;
+        private System.Windows.Forms.GroupBox fileGroupBox;
     }
 }
 

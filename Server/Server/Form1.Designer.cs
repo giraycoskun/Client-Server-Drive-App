@@ -113,6 +113,7 @@
             this.fileBox.Name = "fileBox";
             this.fileBox.Size = new System.Drawing.Size(244, 30);
             this.fileBox.TabIndex = 6;
+            this.fileBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             // 
             // startButton
             // 
@@ -142,7 +143,7 @@
             // 
             this.chooseButton.BackColor = System.Drawing.Color.Cornsilk;
             this.chooseButton.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.chooseButton.Location = new System.Drawing.Point(438, 202);
+            this.chooseButton.Location = new System.Drawing.Point(436, 202);
             this.chooseButton.Name = "chooseButton";
             this.chooseButton.Size = new System.Drawing.Size(116, 36);
             this.chooseButton.TabIndex = 9;
@@ -179,9 +180,8 @@
             this.Controls.Add(this.pictureBox1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Server";
-            this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
