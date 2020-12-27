@@ -63,7 +63,6 @@
             this.portBox.Name = "portBox";
             this.portBox.Size = new System.Drawing.Size(244, 30);
             this.portBox.TabIndex = 1;
-            this.portBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // label2
             // 
@@ -85,7 +84,6 @@
             this.label3.Size = new System.Drawing.Size(51, 23);
             this.label3.TabIndex = 3;
             this.label3.Text = "Logs";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // logBox
             // 
@@ -115,7 +113,6 @@
             this.fileBox.Name = "fileBox";
             this.fileBox.Size = new System.Drawing.Size(244, 30);
             this.fileBox.TabIndex = 6;
-            this.fileBox.TextChanged += new System.EventHandler(this.fileBox_TextChanged);
             // 
             // startButton
             // 
@@ -184,8 +181,6 @@
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Server";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.Form1_FormClosed);
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);

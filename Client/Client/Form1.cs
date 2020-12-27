@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Windows.Forms;
+using System.Collections.Generic;
 
 namespace Client
 {
@@ -21,6 +22,7 @@ namespace Client
         Socket clientSocket;
         string DOWNLOAD_DIR = "";
         bool ACK_CHECK = false;
+
 
         private static ManualResetEvent mre = new ManualResetEvent(false);
         public CLIENT()
@@ -63,7 +65,6 @@ namespace Client
             bool inputCheck = true;
             username = usernameBox.Text;
 
-            //TODO: Input Check
             try
             {
                 Int32.TryParse(portBox.Text, out serverPortNum);
@@ -175,14 +176,14 @@ namespace Client
 
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void chooseFileButton_Click(object sender, EventArgs e)
         {
             uploadFileBox.Enabled = true;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.Filter = "txt files (*.txt)|*.txt";
             openFileDialog1.FilterIndex = 2;
             openFileDialog1.ShowDialog();
-            uploadFileBox.Text = openFileDialog1.FileName;
+            uploadFileBox.Text = openFileDialog1.FileName;           
         }
         private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
@@ -420,7 +421,7 @@ namespace Client
 
         }
 
-        private void button4_Click(object sender, EventArgs e)
+        private void copyButton_Click(object sender, EventArgs e)
         {
 
         }

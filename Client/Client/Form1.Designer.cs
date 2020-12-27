@@ -66,7 +66,6 @@
             this.label1.Size = new System.Drawing.Size(130, 49);
             this.label1.TabIndex = 0;
             this.label1.Text = "CLIENT";
-            this.label1.Click += new System.EventHandler(this.label1_Click);
             // 
             // label2
             // 
@@ -78,7 +77,6 @@
             this.label2.TabIndex = 1;
             this.label2.Text = "Server IP:";
             this.label2.TextAlign = System.Drawing.ContentAlignment.BottomRight;
-            this.label2.Click += new System.EventHandler(this.label2_Click);
             // 
             // label3
             // 
@@ -89,7 +87,6 @@
             this.label3.Size = new System.Drawing.Size(100, 19);
             this.label3.TabIndex = 2;
             this.label3.Text = "Port Number:";
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // outputBox
             // 
@@ -184,7 +181,7 @@
             this.browseButton.TabIndex = 12;
             this.browseButton.Text = "Choose File";
             this.browseButton.UseVisualStyleBackColor = false;
-            this.browseButton.Click += new System.EventHandler(this.button1_Click);
+            this.browseButton.Click += new System.EventHandler(this.chooseFileButton_Click);
             // 
             // openFileDialog1
             // 
@@ -258,7 +255,7 @@
             this.copyButton.TabIndex = 19;
             this.copyButton.Text = "COPY";
             this.copyButton.UseVisualStyleBackColor = false;
-            this.copyButton.Click += new System.EventHandler(this.button4_Click);
+            this.copyButton.Click += new System.EventHandler(this.copyButton_Click);
             // 
             // getFileButton
             // 

@@ -44,16 +44,6 @@ namespace Server
             //usernameList = new List<string>();
 
         }
-        
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void label3_Click(object sender, EventArgs e)
-        {
-
-        }
 
         private void startButton_Click(object sender, EventArgs e)
         {
@@ -492,11 +482,6 @@ namespace Server
             }
         }
 
-        private void fileBox_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private bool checkConnection(Socket socket)
         {
             if (listening)
@@ -550,30 +535,6 @@ namespace Server
         private void Form1_Load(object sender, EventArgs e)
         {
 
-        }
-
-        private void Form1_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            /*
-            try
-            {
-                server.Close();
-
-                foreach (Socket socket in clientSocketList)
-                {
-                    socket.Close();
-                }
-            }
-            catch
-            {
-
-            }
-            */
         }
     }
 }
