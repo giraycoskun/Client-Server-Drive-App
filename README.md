@@ -167,6 +167,7 @@ UNIQUE (filename, owner)
 - A few bytes
 - 1000 kb
 - 500 MB
+- kapital.txt
 - 4GB
 
 ### Disconnections
@@ -181,3 +182,10 @@ UNIQUE (filename, owner)
 - Multiple Client File Upload
 
 
+---
+
+## Screenshots
+### Client Screen
+![Client Screen](./client_screen.JPG)
+### Server Screen
+![Server Screen](./server_screen.jpg)
