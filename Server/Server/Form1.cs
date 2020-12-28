@@ -170,7 +170,6 @@ namespace Server
                 }
             }
         }
-
         private void Receive(Socket thisClient) // updated
         {
             string username = "";
@@ -306,15 +305,11 @@ namespace Server
 
         private bool uploadCommand(Socket client, string commandMessage, string username, string filename)
         {
-            bool fileUploadError = true;
+            bool fileUploadError = false;
             string ackMessage = "ACK " + commandMessage;
             sendClientMessage(client, ackMessage);
 
-            //TO-DO
-            int? count = 0;
-            //count = count == null ? 0 : count + 1;
-            string tempFileName = "";
-            FileStream uploadFile = System.IO.File.Create(Path.Combine(fileDirectory, tempFileName));
+            FileStream uploadFile = System.IO.File.Create(Path.Combine(fileDirectory, filename));
             Byte[] uploadFileBuffer = new Byte[MAX_BUF];
 
             Byte[] fileSizeBuffer = new Byte[64];
@@ -325,7 +320,7 @@ namespace Server
             catch
             {
                 logBox.AppendText("ERROR: During File Upload\n");
-                fileUploadError = false;
+                fileUploadError = true;
                 uploadFile.Close();
                 return false;
             }
@@ -367,31 +362,34 @@ namespace Server
             }
             uploadFile.Close();
 
-            if (fileUploadError)
+            if (!fileUploadError)
             {
-                if (count == 0)
-                {
-                    //TO-DO
-                    //FileDB.InsertFile(username + filename, fileDirectory, username, File.AccessType.PRIVATE);
-                }
-                else
-                {
-                    //TO_DO
-                    //FileDB.IncrementFileCount(username + filename);
-                }
-                logBox.AppendText($"File {tempFileName} UPLOADED\n");
+                FileDB.PrimaryKey newPK = new FileDB.PrimaryKey(filename, username);
+                FileDB.InsertFile(newPK, Path.Combine(fileDirectory, filename));
+                logBox.AppendText($"File {filename} UPLOADED\n");
                 string message = filename + " UPLOADED";
                 sendClientMessage(client, message);
             }
             return true;
         }
 
+        private int GetCopyIdFromFileName(String fullname)
+        {
+
+            if (int.TryParse(fullname.Split('.')[0], out int n))
+            {
+                return n;
+            }
+
+            return  -1;
+        }
         private bool downloadCommand(Socket client, string commandMessage, string username, string filename)
         {
             //command - filename
             //receive file -> receive client ACK
+            //0_filename
             string ackMessage;
-            bool checkFileValid = checkFileValidity(username, filename);
+            bool checkFileValid = checkFileValidity(username, filename, GetCopyIdFromFileName(filename));
             if (checkFileValid)
             {
                 string absoulteFileName = getAbsoluteFilename(username, filename);
@@ -448,9 +446,15 @@ namespace Server
             }
             return true;
         }
-        private bool checkFileValidity(string username, string filename)
+        private bool checkFileValidity(string username, string filename, int incCount)
         {
             //TODO: Database functionality
+            FileDB.PrimaryKey pk = new FileDB.PrimaryKey(username, filename, incCount);
+            if (FileDB.GetFileByKey(pk).Equals(null))
+            {
+                return false;
+            }
+            
             return true;
         }
 

@@ -47,3 +47,4 @@ C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csprojAssemb
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.exe.config
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csproj.CoreCompileInputs.cache
 C:\Users\HP\Documents\CS 408 Project\Server\Server\obj\Debug\Server.csproj.CopyComplete
+C:\Users\Cankut\source\repos\giraycoskun\CS408-Project\Server\Server\obj\Debug\Server.csprojAssemblyReference.cache

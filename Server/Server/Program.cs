@@ -19,9 +19,8 @@ namespace Server
             PUBLIC = 0,
             PRIVATE = 1
         }
-        public File(int id, string fileName, string filePath, string owner, int counter, AccessType type, DateTime uploadDateTime)
+        public File(string fileName, string filePath, string owner, int counter, AccessType type, DateTime uploadDateTime)
         {
-            this.Id = id;
             this.FileName = fileName;
             this.FilePath = filePath;
             this.Owner = owner;
@@ -247,7 +246,7 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), 
+                    File newFile = new File(rdr.GetString(1), 
                                             rdr.GetString(2), rdr.GetString(3), 
                                             rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)),
                                             rdr.GetDateTime(6));
@@ -339,7 +338,7 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
+                    File newFile = new File(rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
                                             rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                     fileList.Add(newFile);
                 }
@@ -368,7 +367,7 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
+                    File newFile = new File(rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
                                             rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                     fileList.Add(newFile);
                 }
@@ -400,7 +399,7 @@ namespace Server
                 if (rdr.HasRows)
                 {
                     rdr.Read();
-                    newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
+                    newFile = new File(rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                 }
 
             }
@@ -489,11 +488,9 @@ namespace Server
         [STAThread]
         static void Main()
         {
-            FileDB.PrimaryKey pk = new FileDB.PrimaryKey("giraybasic.txt", "cankut");
-            FileDB.InsertFile(pk, "//pathToFile");
-            //Application.EnableVisualStyles();
-            //Application.SetCompatibleTextRenderingDefault(false);
-            //Application.Run(new Form1());
+            Application.EnableVisualStyles();
+            Application.SetCompatibleTextRenderingDefault(false);
+            Application.Run(new Form1());
 
         }
     }
