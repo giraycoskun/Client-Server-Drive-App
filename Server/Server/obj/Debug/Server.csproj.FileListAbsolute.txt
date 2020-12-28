@@ -1,4 +1,3 @@
-C:\Users\Cankut\source\repos\giraycoskun\CS408-Project\Server\Server\obj\Debug\Server.csprojAssemblyReference.cache
 C:\Users\Cankut\source\repos\giraycoskun\CS408-Project\Server\Server\obj\Debug\Server.exe.config
 C:\Users\Cankut\source\repos\giraycoskun\CS408-Project\Server\Server\obj\Debug\Server.Form1.resources
 C:\Users\Cankut\source\repos\giraycoskun\CS408-Project\Server\Server\obj\Debug\Server.Properties.Resources.resources

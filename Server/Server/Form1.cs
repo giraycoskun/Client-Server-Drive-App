@@ -310,10 +310,10 @@ namespace Server
             string ackMessage = "ACK " + commandMessage;
             sendClientMessage(client, ackMessage);
 
-            int? count = Program.GetIncCountByName(username + filename);
-            count = count == null ? 0 : count + 1;
-
-            string tempFileName = count.ToString() + "." + username + "." + filename;
+            //TO-DO
+            int? count = 0;
+            //count = count == null ? 0 : count + 1;
+            string tempFileName = "";
             FileStream uploadFile = System.IO.File.Create(Path.Combine(fileDirectory, tempFileName));
             Byte[] uploadFileBuffer = new Byte[MAX_BUF];
 
@@ -371,11 +371,13 @@ namespace Server
             {
                 if (count == 0)
                 {
-                    Program.InsertFile(username + filename, fileDirectory, username, File.AccessType.PRIVATE);
+                    //TO-DO
+                    //FileDB.InsertFile(username + filename, fileDirectory, username, File.AccessType.PRIVATE);
                 }
                 else
                 {
-                    Program.IncrementFileCount(username + filename);
+                    //TO_DO
+                    //FileDB.IncrementFileCount(username + filename);
                 }
                 logBox.AppendText($"File {tempFileName} UPLOADED\n");
                 string message = filename + " UPLOADED";

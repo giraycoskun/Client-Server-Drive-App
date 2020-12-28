@@ -76,21 +76,34 @@ namespace Server
 
     public static class FileDB
     {
-        public readonly struct PrimaryKey
-        {
+        public class PrimaryKey
+        { 
+            public String FileName { get; }
+            public String Owner { get; }
+            public int IncCount { get; }
             public PrimaryKey(String fileName, String owner)
             {
                 FileName = fileName;
                 Owner = owner;
-                IncCount = GetNextIncCount() ;
+                IncCount = GetNextIncCount(fileName, owner);
+            }   
+            public PrimaryKey(String fileName, String owner, int incCount)
+            {
+                FileName = fileName;
+                Owner = owner;
+
+                if (CheckIncCount(fileName, owner, incCount))
+                {//VALID 
+                    IncCount = incCount;
+                }
+                else
+                {
+                    IncCount = GetNextIncCount(fileName, owner);
+                }
             }
-
-            public String FileName { get; init; }
-            public String Owner { get; init; }
-            public int IncCount { get; }
-
             public override string ToString() => $"({FileName}, {Owner}, {IncCount})";
         }
+
         //Singleton (Lazy Initilization)
         private static MySqlConnection mySqlConnection = null;
         private const string CONNECTION_STRING = @"server=remotemysql.com;userid=ioI0xzbThf;password=VGITbQxEEa;database=ioI0xzbThf";
@@ -99,19 +112,29 @@ namespace Server
         private const string INSERT_SQL =
             "INSERT INTO FILES (fileName, filePath, owner, incCount, accessType) VALUES(@fileName, @filePath, @owner, @incCount, @accessType)";
 
-        private const string UPDATE_COUNT_SQL = "UPDATE FILES SET incCount = @newIncCount WHERE fileName = @fileName";
-        private const string UPDATE_ACCESS_TYPE_SQL = "UPDATE FILES SET accessType = @newAccessType WHERE fileName = @fileName";
+        private const string GET_NEXT_INCCOUNT = 
+            "SELECT MAX(incCount) FROM FILES WHERE fileName = @fileName AND owner = @owner";
 
-        private const string DELETE_FILE_BY_NAME_SQL = "DELETE FROM FILES WHERE fileName = @fileName";
-        private const string DELETE_FILE_BY_ID_SQL = "DELETE FROM FILES WHERE id = @id";
+        private const string CHECK_INCCOUNT =
+            "SELECT COUNT(*) FROM FILES WHERE fileName = @fileName AND owner = @owner AND incCount = @incCount";
+
+        private const string UPDATE_ACCESS_TYPE_SQL = 
+            "UPDATE FILES SET accessType = @newAccessType WHERE fileName = @fileName AND owner = @owner AND incCount = @incCount";
+
+        private const string DELETE_FILE_BY_KEY_SQL = 
+            "DELETE FROM FILES WHERE fileName = @fileName AND owner = @owner AND incCount = @incCount";
+
+        private const string GET_FILE_BY_KEY_SQL =
+            "SELECT * FROM FILES WHERE fileName = @fileName AND owner = @owner AND incCount = @incCount";
 
         private const string GET_ALL_FILES_SQL = "SELECT * FROM FILES";
         private const string GET_FILES_BY_OWNER_SQL = "SELECT * FROM FILES WHERE owner = @owner";
         private const string GET_FILES_BY_ACCESS_TYPE_SQL = "SELECT * FROM FILES WHERE accessType = @accessType";
         private const string GET_ALL_FILE_NAMES_SQL = "SELECT fileName FROM FILES";
         private const string GET_PUBLIC_FILE_NAMES_SQL = "SELECT fileName FROM FILES WHERE  accessType = 'PUBLIC'";
-        private const string GET_FILE_BY_NAME_SQL = "SELECT * FROM FILES WHERE fileName = @fileName";
-        private const string GET_INC_COUNT_SQL = "SELECT incCount FROM FILES WHERE fileName = @fileName";
+        private const string GET_FILES_BY_NAME_SQL = "SELECT * FROM FILES WHERE fileName = @fileName";
+        
+        //Singleton init function
         public static MySqlConnection GetMySqlConnection()
         {
             try
@@ -133,6 +156,64 @@ namespace Server
 
             return mySqlConnection;
 
+        }
+        private static int GetNextIncCount(String fileName, String owner)
+        {
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_NEXT_INCCOUNT, conn);
+                cmd.Parameters.AddWithValue("@fileName", fileName);
+                cmd.Parameters.AddWithValue("@owner", owner);
+                object result = cmd.ExecuteScalar();
+
+                if (!DBNull.Value.Equals(result))
+                {
+                    return Convert.ToInt32(result) + 1;
+                }
+
+            }
+            catch (Exception e)
+            {
+                //TO-DO                
+                Console.WriteLine("Error: {0}", e.ToString());
+                throw e;
+
+            }
+
+            //If no such file exist returns 0
+            return 0;
+        }
+        private static bool CheckIncCount(String fileName, String owner, int incCount)
+        {
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(CHECK_INCCOUNT, conn);
+                cmd.Parameters.AddWithValue("@fileName", fileName);
+                cmd.Parameters.AddWithValue("@owner", owner);
+                cmd.Parameters.AddWithValue("@incCount", incCount);
+
+                object result = cmd.ExecuteScalar();
+
+                if (Convert.ToInt32(result) == 1)
+                {
+                    return true;
+                }
+                else if (Convert.ToInt32(result) == 0)
+                {
+                    return false;
+                }
+                else
+                {
+                    throw new Exception("PRIMARY KEY CONSTRAINT VIOLATION");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error: {0}", e.ToString());
+                throw e;
+            }
         }
         public static void DumbDB()
         {
@@ -181,95 +262,6 @@ namespace Server
             }
 
             return fileList;
-        }
-        public static List<File> GetFilesByOwner(String owner)
-        {
-            List<File> fileList = new List<File>();
-
-            try
-            {
-                MySqlConnection conn = GetMySqlConnection();
-                MySqlCommand cmd = new MySqlCommand(GET_FILES_BY_OWNER_SQL, conn);
-                cmd.Parameters.AddWithValue("@owner", owner);
-                MySqlDataReader rdr = cmd.ExecuteReader();
-
-                while (rdr.Read())
-                {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
-                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
-                    fileList.Add(newFile);
-                }
-
-                rdr.Close();
-            }
-            catch (Exception e)
-            {
-                //TO-DO
-            }
-
-            return fileList;
-        }
-        public static List<File> GetFilesByAccessType(File.AccessType accessType = File.AccessType.PUBLIC)
-        {
-            List<File> fileList = new List<File>();
-
-            try
-            {
-                MySqlConnection conn = GetMySqlConnection();
-                MySqlCommand cmd = new MySqlCommand(GET_FILES_BY_ACCESS_TYPE_SQL, conn);
-                cmd.Parameters.AddWithValue("@accessType", accessType.ToString());
-                MySqlDataReader rdr = cmd.ExecuteReader();
-
-                while (rdr.Read())
-                {
-                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
-                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
-                    fileList.Add(newFile);
-                }
-
-                rdr.Close();
-            }
-            catch (Exception e)
-            {
-                //TO-DO
-            }
-
-            return fileList;
-        }
-        public static File GetFileByName(String fileName)
-        {
-            MySqlDataReader rdr = null;
-            File newFile = null;
-
-            try
-            {
-                MySqlConnection conn = GetMySqlConnection();
-                MySqlCommand cmd = new MySqlCommand(GET_FILE_BY_NAME_SQL, conn);
-                cmd.Parameters.AddWithValue("@fileName", fileName);
-                rdr = cmd.ExecuteReader();
-
-                if (rdr.HasRows)
-                {
-                    rdr.Read();
-                    newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
-                }
-
-            }
-            catch (Exception e)
-            {
-                //TO-DO
-            }
-            finally
-            {
-                if (rdr != null)
-                {
-                    rdr.Close();
-
-                }
-            }
-
-            return newFile;
-
         }
         public static List<String> GetAllFileNames()
         {
@@ -334,45 +326,112 @@ namespace Server
 
             return fileNames;
         }
-
-        //TO-DO: PK
-        public static int? GetNextIncCountBy(String fileName)
+        public static List<File> GetFilesByOwner(String owner)
         {
+            List<File> fileList = new List<File>();
+
             try
             {
                 MySqlConnection conn = GetMySqlConnection();
-                MySqlCommand cmd = new MySqlCommand(GET_INC_COUNT_SQL, conn);
-                cmd.Parameters.AddWithValue("@fileName", fileName);
-                Object result = cmd.ExecuteScalar();
+                MySqlCommand cmd = new MySqlCommand(GET_FILES_BY_OWNER_SQL, conn);
+                cmd.Parameters.AddWithValue("@owner", owner);
+                MySqlDataReader rdr = cmd.ExecuteReader();
 
-                if (result != null)
+                while (rdr.Read())
                 {
-                    int incCount = Convert.ToInt32(result);
-                    return incCount;
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
+                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
+                    fileList.Add(newFile);
+                }
+
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                //TO-DO
+            }
+
+            return fileList;
+        }
+        
+        //By default get all public files
+        public static List<File> GetFilesByAccessType(File.AccessType accessType = File.AccessType.PUBLIC)
+        {
+            List<File> fileList = new List<File>();
+
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_FILES_BY_ACCESS_TYPE_SQL, conn);
+                cmd.Parameters.AddWithValue("@accessType", accessType.ToString());
+                MySqlDataReader rdr = cmd.ExecuteReader();
+
+                while (rdr.Read())
+                {
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
+                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
+                    fileList.Add(newFile);
+                }
+
+                rdr.Close();
+            }
+            catch (Exception e)
+            {
+                //TO-DO
+            }
+
+            return fileList;
+        }
+        public static File GetFileByKey(PrimaryKey key)
+        {
+            MySqlDataReader rdr = null;
+            File newFile = null;
+
+            try
+            {
+                MySqlConnection conn = GetMySqlConnection();
+                MySqlCommand cmd = new MySqlCommand(GET_FILE_BY_KEY_SQL, conn);
+                cmd.Parameters.AddWithValue("@fileName", key.FileName);
+                cmd.Parameters.AddWithValue("@owner", key.Owner);
+                cmd.Parameters.AddWithValue("@incCount", key.IncCount);
+
+                rdr = cmd.ExecuteReader();
+
+                if (rdr.HasRows)
+                {
+                    rdr.Read();
+                    newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                 }
 
             }
             catch (Exception e)
             {
-                //TO-DO                
-                Console.WriteLine("Error: {0}", e.ToString());
-
+                //TO-DO
             }
+            finally
+            {
+                if (rdr != null)
+                {
+                    rdr.Close();
 
-            return null;
+                }
+            }
+            
+            //if there is no such file in the database returns null
+            return newFile;
+
         }
-        private static int GetNextIncCount(String fileName, String owner) { }
-        public static void InsertFile(String fileName, String filePath, String owner, File.AccessType accessType)
+        public static void InsertFile(PrimaryKey pk, String filePath, File.AccessType accessType = File.AccessType.PRIVATE)
         {
             try
             {
                 MySqlConnection conn = GetMySqlConnection();
 
                 MySqlCommand cmd = new MySqlCommand(INSERT_SQL, conn);
-                cmd.Parameters.AddWithValue("@fileName", fileName);
+                cmd.Parameters.AddWithValue("@fileName", pk.FileName);
+                cmd.Parameters.AddWithValue("@owner", pk.Owner);
+                cmd.Parameters.AddWithValue("@incCount", pk.IncCount);
                 cmd.Parameters.AddWithValue("@filePath", filePath);
-                cmd.Parameters.AddWithValue("@owner", owner);
-,                 cmd.Parameters.AddWithValue("@incCount", getNextIncCount());
                 cmd.Parameters.AddWithValue("@accessType", accessType.ToString());
 
                 cmd.ExecuteNonQuery();
@@ -383,14 +442,16 @@ namespace Server
             }
 
         }
-        public static void DeleteFile(String fileName, String owner)
+        public static void DeleteFile(PrimaryKey pk)
         {
             try
             {
                 MySqlConnection conn = GetMySqlConnection();
 
-                MySqlCommand cmd = new MySqlCommand(DELETE_FILE_BY_NAME_SQL, conn);
-                cmd.Parameters.AddWithValue("@fileName", fileName);
+                MySqlCommand cmd = new MySqlCommand(DELETE_FILE_BY_KEY_SQL, conn);
+                cmd.Parameters.AddWithValue("@fileName", pk.FileName);
+                cmd.Parameters.AddWithValue("@owner", pk.Owner);
+                cmd.Parameters.AddWithValue("@incCount", pk.IncCount);
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
@@ -398,16 +459,16 @@ namespace Server
                 Console.WriteLine("Error: {0}", e.ToString());
             }
         }
-
-        //TO-DO: PK
-        public static void UpdateAccessType(File.AccessType newAccessType, String fileName)
+        public static void UpdateAccessType(PrimaryKey pk, File.AccessType newAccessType)
         {
             try
             {
                 MySqlConnection conn = GetMySqlConnection();
 
                 MySqlCommand cmd = new MySqlCommand(UPDATE_ACCESS_TYPE_SQL, conn);
-                cmd.Parameters.AddWithValue("@fileName", fileName);
+                cmd.Parameters.AddWithValue("@fileName", pk.FileName);
+                cmd.Parameters.AddWithValue("@owner", pk.Owner);
+                cmd.Parameters.AddWithValue("@incCount", pk.IncCount);
                 cmd.Parameters.AddWithValue("@newAccessType", newAccessType.ToString());
 
                 cmd.ExecuteNonQuery();
@@ -417,34 +478,6 @@ namespace Server
                 Console.WriteLine("Error: {0}", e.ToString());
             }
         }
-
-        //private static void UpdateCount(int? newCount, String fileName)
-        //{
-        //    try
-        //    {
-        //        MySqlConnection conn = GetMySqlConnection();
-
-        //        MySqlCommand cmd = new MySqlCommand(UPDATE_COUNT_SQL, conn);
-        //        cmd.Parameters.AddWithValue("@fileName", fileName);
-        //        cmd.Parameters.AddWithValue("@newIncCount", newCount);
-
-        //        cmd.ExecuteNonQuery();
-        //    }
-        //    catch (Exception e)
-        //    {
-        //        Console.WriteLine("Error: {0}", e.ToString());
-        //    }
-        //}
-        //public static void IncrementFileCount(String fileName)
-        //{
-        //    int? preCount = GetIncCountByName(fileName);
-        //    if (preCount != null)
-        //    {
-        //        int? newCount = preCount + 1;
-        //        UpdateCount(newCount, fileName);
-
-        //    }
-        //}
     }
 
 
@@ -456,10 +489,11 @@ namespace Server
         [STAThread]
         static void Main()
         {
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            FileDB.PrimaryKey pk = new FileDB.PrimaryKey("giraybasic.txt", "cankut");
+            FileDB.InsertFile(pk, "//pathToFile");
+            //Application.EnableVisualStyles();
+            //Application.SetCompatibleTextRenderingDefault(false);
+            //Application.Run(new Form1());
 
         }
     }
