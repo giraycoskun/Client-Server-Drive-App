@@ -314,7 +314,7 @@ namespace Server
             count = count == null ? 0 : count + 1;
 
             string tempFileName = count.ToString() + "." + username + "." + filename;
-            FileStream uploadFile = File.Create(Path.Combine(fileDirectory, tempFileName));
+            FileStream uploadFile = System.IO.File.Create(Path.Combine(fileDirectory, tempFileName));
             Byte[] uploadFileBuffer = new Byte[MAX_BUF];
 
             Byte[] fileSizeBuffer = new Byte[64];
@@ -371,7 +371,7 @@ namespace Server
             {
                 if (count == 0)
                 {
-                    Program.InsertFile(username + filename, fileDirectory, username, File1.AccessType.PRIVATE);
+                    Program.InsertFile(username + filename, fileDirectory, username, File.AccessType.PRIVATE);
                 }
                 else
                 {

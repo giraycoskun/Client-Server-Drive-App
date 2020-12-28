@@ -11,17 +11,15 @@ using MySql.Data.MySqlClient;
 
 namespace Server
 {
-    public class File1
+    public class File
     {
-        public File1() { }
-
+        public File() { }
         public enum AccessType
         {
             PUBLIC = 0,
             PRIVATE = 1
         }
-
-        public File1(int id, string fileName, string filePath, string owner, int counter, AccessType type)
+        public File(int id, string fileName, string filePath, string owner, int counter, AccessType type, DateTime uploadDateTime)
         {
             this.Id = id;
             this.FileName = fileName;
@@ -29,29 +27,28 @@ namespace Server
             this.Owner = owner;
             this.Counter = counter;
             this.FileAccessType = type;
+            this.UploadDateTime = uploadDateTime;
         }
-
         public int Id { get; set; }
         public string FileName { get; set; }
         public string FilePath { get; set; }
         public string Owner { get; set; }
         public int Counter { get; set; }
         public AccessType FileAccessType { get; set; }
-
-     
+        public DateTime UploadDateTime { get; set; }
     }
 
     public static class FileUtils
     {
-        public static File1.AccessType AccessTypeConverter(string val)
+        public static File.AccessType AccessTypeConverter(string val)
         {
             switch (val)
             {
                 case "PUBLIC":
-                    return File1.AccessType.PUBLIC;
+                    return File.AccessType.PUBLIC;
 
                 case "PRIVATE":
-                    return File1.AccessType.PRIVATE;
+                    return File.AccessType.PRIVATE;
 
                 default:
                     throw new Exception("INVALID ACCESS TYPE INPUTTED");
@@ -59,15 +56,15 @@ namespace Server
             }
         }
 
-        public static File1.AccessType AccessTypeConverter(int key)
+        public static File.AccessType AccessTypeConverter(int key)
         {
             switch (key)
             {
                 case 0:
-                    return File1.AccessType.PUBLIC;
+                    return File.AccessType.PUBLIC;
 
                 case 1:
-                    return File1.AccessType.PRIVATE;
+                    return File.AccessType.PRIVATE;
 
                 default:
                     throw new Exception("INVALID ACCESS TYPE INPUTTED");
@@ -77,21 +74,30 @@ namespace Server
     }
 
 
-    public static class MyDB
+    public static class FileDB
     {
+        public readonly struct PrimaryKey
+        {
+            public PrimaryKey(String fileName, String owner)
+            {
+                FileName = fileName;
+                Owner = owner;
+                IncCount = GetNextIncCount() ;
+            }
 
-    }
+            public String FileName { get; init; }
+            public String Owner { get; init; }
+            public int IncCount { get; }
 
-
-    public static class Program
-    {
+            public override string ToString() => $"({FileName}, {Owner}, {IncCount})";
+        }
         //Singleton (Lazy Initilization)
         private static MySqlConnection mySqlConnection = null;
         private const string CONNECTION_STRING = @"server=remotemysql.com;userid=ioI0xzbThf;password=VGITbQxEEa;database=ioI0xzbThf";
 
         //QUERIES
         private const string INSERT_SQL =
-            "INSERT INTO FILES (fileName, filePath, owner, accessType) VALUES(@fileName, @filePath, @owner, @accessType)";
+            "INSERT INTO FILES (fileName, filePath, owner, incCount, accessType) VALUES(@fileName, @filePath, @owner, @incCount, @accessType)";
 
         private const string UPDATE_COUNT_SQL = "UPDATE FILES SET incCount = @newIncCount WHERE fileName = @fileName";
         private const string UPDATE_ACCESS_TYPE_SQL = "UPDATE FILES SET accessType = @newAccessType WHERE fileName = @fileName";
@@ -108,42 +114,28 @@ namespace Server
         private const string GET_INC_COUNT_SQL = "SELECT incCount FROM FILES WHERE fileName = @fileName";
         public static MySqlConnection GetMySqlConnection()
         {
-            if (mySqlConnection == null)
+            try
             {
-                try
+                if (mySqlConnection == null)
                 {
                     mySqlConnection = new MySqlConnection(CONNECTION_STRING);
                     mySqlConnection.Open();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error: {0}", e.ToString());
-                    //Terminate program execution
-                    //System.Environment.Exit(0);
-                    throw e;
-                }
-            }
-
-            if (mySqlConnection.State == ConnectionState.Closed || mySqlConnection.State == ConnectionState.Broken)
-            {
-                try
+                else if (mySqlConnection.State == ConnectionState.Closed || mySqlConnection.State == ConnectionState.Broken)
                 {
                     mySqlConnection.Open();
                 }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error: {0}", e.ToString());
-                    throw e;
-                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
 
             return mySqlConnection;
 
         }
-
         public static void DumbDB()
         {
-
             MySqlConnection conn = GetMySqlConnection();
 
             string query = "SELECT * FROM FILES;";
@@ -162,10 +154,9 @@ namespace Server
                 Console.Write("\n");
             }
         }
-
-        public static List<File1> GetAllFiles()
+        public static List<File> GetAllFiles()
         {
-            List<File1> fileList = new List<File1>();
+            List<File> fileList = new List<File>();
 
             try
             {
@@ -175,7 +166,10 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File1 newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), 
+                                            rdr.GetString(2), rdr.GetString(3), 
+                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)),
+                                            rdr.GetDateTime(6));
                     fileList.Add(newFile);
                 }
 
@@ -188,9 +182,9 @@ namespace Server
 
             return fileList;
         }
-        public static List<File1> GetFilesByOwner(String owner)
+        public static List<File> GetFilesByOwner(String owner)
         {
-            List<File1> fileList = new List<File1>();
+            List<File> fileList = new List<File>();
 
             try
             {
@@ -201,7 +195,8 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File1 newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
+                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                     fileList.Add(newFile);
                 }
 
@@ -214,9 +209,9 @@ namespace Server
 
             return fileList;
         }
-        public static List<File1> GetFilesByAccessType(File1.AccessType accessType)
+        public static List<File> GetFilesByAccessType(File.AccessType accessType = File.AccessType.PUBLIC)
         {
-            List<File1> fileList = new List<File1>();
+            List<File> fileList = new List<File>();
 
             try
             {
@@ -227,7 +222,8 @@ namespace Server
 
                 while (rdr.Read())
                 {
-                    File1 newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    File newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), 
+                                            rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                     fileList.Add(newFile);
                 }
 
@@ -240,10 +236,10 @@ namespace Server
 
             return fileList;
         }
-        public static File1 GetFileByName(String fileName)
+        public static File GetFileByName(String fileName)
         {
             MySqlDataReader rdr = null;
-            File1 newFile = null;
+            File newFile = null;
 
             try
             {
@@ -255,7 +251,7 @@ namespace Server
                 if (rdr.HasRows)
                 {
                     rdr.Read();
-                    newFile = new File1(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)));
+                    newFile = new File(rdr.GetInt16(0), rdr.GetString(1), rdr.GetString(2), rdr.GetString(3), rdr.GetInt16(4), FileUtils.AccessTypeConverter(rdr.GetString(5)), rdr.GetDateTime(6));
                 }
 
             }
@@ -265,7 +261,7 @@ namespace Server
             }
             finally
             {
-                if(rdr != null)
+                if (rdr != null)
                 {
                     rdr.Close();
 
@@ -275,11 +271,10 @@ namespace Server
             return newFile;
 
         }
-
         public static List<String> GetAllFileNames()
         {
             List<String> fileNames = new List<String>();
-            MySqlDataReader rdr = null ;
+            MySqlDataReader rdr = null;
 
             try
             {
@@ -300,7 +295,7 @@ namespace Server
             }
             finally
             {
-                if(rdr != null)
+                if (rdr != null)
                 {
                     rdr.Close();
                 }
@@ -331,15 +326,17 @@ namespace Server
             }
             finally
             {
-                if(rdr != null)
+                if (rdr != null)
                 {
                     rdr.Close();
                 }
-            }  
+            }
 
             return fileNames;
         }
-        public static int? GetIncCountByName(String fileName)
+
+        //TO-DO: PK
+        public static int? GetNextIncCountBy(String fileName)
         {
             try
             {
@@ -364,7 +361,8 @@ namespace Server
 
             return null;
         }
-        public static void InsertFile(String fileName, String filePath, String owner, File1.AccessType accessType)
+        private static int GetNextIncCount(String fileName, String owner) { }
+        public static void InsertFile(String fileName, String filePath, String owner, File.AccessType accessType)
         {
             try
             {
@@ -374,7 +372,7 @@ namespace Server
                 cmd.Parameters.AddWithValue("@fileName", fileName);
                 cmd.Parameters.AddWithValue("@filePath", filePath);
                 cmd.Parameters.AddWithValue("@owner", owner);
-                //Enum access type error
+,                 cmd.Parameters.AddWithValue("@incCount", getNextIncCount());
                 cmd.Parameters.AddWithValue("@accessType", accessType.ToString());
 
                 cmd.ExecuteNonQuery();
@@ -385,7 +383,7 @@ namespace Server
             }
 
         }
-        public static void DeleteFileByName(String fileName)
+        public static void DeleteFile(String fileName, String owner)
         {
             try
             {
@@ -400,7 +398,9 @@ namespace Server
                 Console.WriteLine("Error: {0}", e.ToString());
             }
         }
-        public static void UpdateAccessType(File1.AccessType newAccessType, String fileName)
+
+        //TO-DO: PK
+        public static void UpdateAccessType(File.AccessType newAccessType, String fileName)
         {
             try
             {
@@ -417,35 +417,39 @@ namespace Server
                 Console.WriteLine("Error: {0}", e.ToString());
             }
         }
-        private static void UpdateCount(int? newCount, String fileName)
-        {
-            try
-            {
-                MySqlConnection conn = GetMySqlConnection();
 
-                MySqlCommand cmd = new MySqlCommand(UPDATE_COUNT_SQL, conn);
-                cmd.Parameters.AddWithValue("@fileName", fileName);
-                cmd.Parameters.AddWithValue("@newIncCount", newCount);
+        //private static void UpdateCount(int? newCount, String fileName)
+        //{
+        //    try
+        //    {
+        //        MySqlConnection conn = GetMySqlConnection();
 
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("Error: {0}", e.ToString());
-            }
-        }
-        public static void IncrementFileCount(String fileName)
-        {
-            int? preCount = GetIncCountByName(fileName);
-            if (preCount != null)
-            {
-                int? newCount = preCount + 1;
-                UpdateCount(newCount, fileName);
+        //        MySqlCommand cmd = new MySqlCommand(UPDATE_COUNT_SQL, conn);
+        //        cmd.Parameters.AddWithValue("@fileName", fileName);
+        //        cmd.Parameters.AddWithValue("@newIncCount", newCount);
 
-            }
-        }
+        //        cmd.ExecuteNonQuery();
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        Console.WriteLine("Error: {0}", e.ToString());
+        //    }
+        //}
+        //public static void IncrementFileCount(String fileName)
+        //{
+        //    int? preCount = GetIncCountByName(fileName);
+        //    if (preCount != null)
+        //    {
+        //        int? newCount = preCount + 1;
+        //        UpdateCount(newCount, fileName);
+
+        //    }
+        //}
+    }
 
 
+    public static class Program
+    {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
