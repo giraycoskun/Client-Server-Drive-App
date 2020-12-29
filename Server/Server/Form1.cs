@@ -391,7 +391,7 @@ namespace Server
                 FileDB.PrimaryKey newPK = new FileDB.PrimaryKey(filename, username);
                 FileDB.InsertFile(newPK, Path.Combine(fileDirectory, filename));
                 logBox.AppendText($"File {newPK.ToString()} UPLOADED\n");
-                string message = filename + " UPLOADED";
+                string message = newPK.IncCount + "." + newPK.FileName + " UPLOADED";
                 sendClientMessage(client, message);
             }
             return true;
@@ -657,27 +657,25 @@ namespace Server
                 int n, temp = 0;
                 int fileCount = fileList.Count();
 
-                if(fileCount == 0)
-                {
-                    string fileListEmptyStrig = "File List is Empty";
-                    Byte[] getFileBuffer = Encoding.Default.GetBytes(fileListEmptyStrig);
-                    n = client.Send(getFileBuffer);
-                }
+                Byte[] fileCountBuffer = new Byte[64];
+                fileCountBuffer = Encoding.Default.GetBytes(fileCount.ToString());
+                n = client.Send(fileCountBuffer);
 
                 while (temp < fileCount)
                 {
-                    string fileDirectoryName = Path.Combine(fileDirectory,(username + "." + fileList[temp].Counter.ToString() + "." + fileList[temp].FileName));
-                    FileInfo info = new FileInfo(fileDirectoryName);
-                    long length = info.Length;
+                    string fileDirectoryName = Path.Combine(fileDirectory,(fileList[temp].Owner + "." + fileList[temp].Counter.ToString() + "." + fileList[temp].FileName));
+                    if(System.IO.File.Exists(fileDirectoryName))
+                    { 
+                        FileInfo info = new FileInfo(fileDirectoryName);
+                        long length = info.Length;
 
-                    string tempFilename = "Name: " + fileList[temp].Counter +"."+ fileList[temp].FileName + " Size: " + length.ToString() + " Time:" +fileList[temp].UploadDateTime.ToString() +"\n";
-                    Byte[] getFileBuffer = Encoding.Default.GetBytes(tempFilename);
-                    n = client.Send(getFileBuffer);
-
+                        string tempFilename = "Name: " + fileList[temp].Counter +"."+ fileList[temp].FileName + " | Size: " + length.ToString() + " | Time:" +fileList[temp].UploadDateTime.ToString() + " | Acces: "+ fileList[temp].FileAccessType.ToString() +"\n";
+                        Byte[] getFileBuffer = Encoding.Default.GetBytes(tempFilename);
+                        n = client.Send(getFileBuffer);
+                    }
                     temp += 1;
                 }
 
-                
                 logBox.AppendText("Server: File List Sending Finished\n");
                 Byte[] clientAckBuffer = new Byte[64];
                 int clientAckN = client.Receive(clientAckBuffer);

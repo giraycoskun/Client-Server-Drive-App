@@ -386,8 +386,6 @@ namespace Client
             outputBox.AppendText(EventText);
         }
 
-        
-
         private void copyButton_Click(object sender, EventArgs e)
         {
             bool connection = false;
@@ -724,20 +722,39 @@ namespace Client
             List<String> fileList = new List<String>();
             bool getFileError = false;
             bool result = true;
+            int numBytes;
+            int fileCount = 0;
+            string getFileMessage;
 
-            Byte[] getFileBuffer = new byte[64];
-            while (true)
+            try
+            {
+                Byte[] fileCountBuffer = new byte[64];
+                numBytes = clientSocket.Receive(fileCountBuffer);
+                getFileMessage = Encoding.Default.GetString(fileCountBuffer);
+                fileCount = Int32.Parse(getFileMessage.TrimEnd('\0'));
+            }
+            catch
+            {
+                outputBox.AppendText("ERROR: During Get File\n");
+                getFileError = true;
+            }
+
+            Byte[] getFileBuffer = new byte[128];
+            bool fileNumCheck = true;
+            int temp = 0;
+            while (fileNumCheck && (fileCount > 0))
             {
                 try
                 {
-                    Array.Clear(getFileBuffer, 0, 64);
-                    int numBytes = clientSocket.Receive(getFileBuffer);
-                    int index = Array.FindIndex(getFileBuffer, checkEnd);
-                    string getFileMessage = Encoding.Default.GetString(getFileBuffer);
+                    Array.Clear(getFileBuffer, 0, 128);
+                    numBytes = clientSocket.Receive(getFileBuffer,0,128, SocketFlags.None);
+                    //int index = Array.FindIndex(getFileBuffer, checkEnd);
+                    getFileMessage = Encoding.Default.GetString(getFileBuffer);
                     getFileMessage = getFileMessage.TrimEnd('\0');
                     string[] fileArray = getFileMessage.Split('\n');
                     fileList.AddRange(fileArray);
-                    if (index > -1)
+                    temp += 1;
+                    if (temp == fileCount)
                     {
                         break;
                     }
@@ -754,16 +771,24 @@ namespace Client
             {
                 string output = "Client: Received File List\n";
                 safeLogWrite(output);
-                //POSSIBLE PROBLEM with cross-thread calls
+                
                 output = "\nFILE LIST:\n-------\n";
                 safeLogWrite(output);
-                int count = 0;
-                fileList.RemoveAll(checkEmptyString);
-                foreach (string element in fileList)
+                if (fileCount > 0)
                 {
-                    count++;
-                    string fileLine = $"File-{count}: {element}\n";
-                    safeLogWrite(fileLine);
+                    int count = 0;
+                    fileList.RemoveAll(checkEmptyString);
+                    foreach (string element in fileList)
+                    {
+                        count++;
+                        string fileLine = $"File-{count}: {element}\n";
+                        safeLogWrite(fileLine);
+                    }
+                }
+                else
+                {
+                    output = "File List is Empty\n";
+                    safeLogWrite(output);
                 }
                 output = "-------\n\n";
                 safeLogWrite(output);
