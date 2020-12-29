@@ -28,10 +28,8 @@ UNIQUE (filename, owner)
 - connectionstring = "server=remotemysql.com;userid=ioI0xzbThf;password=VGITbQxEEa;database=ioI0xzbThf"
 - MySqlConnection databaseConnection = new MySqlConnection(connectionString);
 
-**Common Functions:**
-  - InsertFile(String fileName, String filePath, String owner, File1.AccessType accessType)
-  - IncrementFileCount(String fileName)
-  - GetIncCountByName(String fileName)
+**Database Functions:**
+
   
 ---
 
@@ -52,45 +50,57 @@ UNIQUE (filename, owner)
 - startButton : starts server
 - stopButton : stops server
 
-**Functions**
+**Libraries**
 
-- void startButton_Click(object sender, EventArgs e): Opens Server and relays to <ins>Accept()</ins>
-
-- void stopButton_Click(object sender, EventArgs e): stops server
-
-- void Accept(): get incoming clients and relay to <ins>Receive()</ins>
-
-- void Receive(Socket thisClient): get username message and check decide to accept or reject if rejected disconnect else relays to <ins>handleClient()</ins>
-
-- bool checkUsername(string username): checks if the username is already connected
-
-- void handleClient(Socket client, string username): Main Loop to wait for client commands. And handles the command.
-
-	Commands:
-		- UPLOAD <filename>
-		- ...
-- void sendClientMessage(Socket client, string message): sends message to client socket.
-
-- void rejectClient(Socket client, string username): Sends "REJECT" to client socket.
-
-- void browseButton_Click(object sender, EventArgs e): opens file browser and sets the chosen path as <ins>fileDirectory</ins>
-
-- bool checkConnection(Socket socket): checks if the connection is up by sending zero byte message.
-
-- bool checkEnd(Byte b): checks if the byte is '\0'
-
+- using System;
+- using System.Collections.Generic;
+- using System.Linq;
+- using System.IO;
+- using System.Net;
+- using System.Net.Sockets;
+- using System.Text;
+- using System.Threading;
+- using System.Windows.Forms;
 
 **Globals**
 
-- portNum: int
-- MAX_CLIENT: int
-- MAX_BUF: int
-- listening: bool
-- fileDirectory: string
-- server: Socket
-- ipAdress: IPAdress
-- clientSocketList: list<Socket>
-- usernameList: <string>
+- int portNum;
+- int MAX_CLIENT = 128;
+- int MAX_BUF = (2 << 22);
+- bool listening;
+- string fileDirectory = "";
+- Socket server;
+- IPAddress ipAddress;
+- List<Socket> clientSocketList = new List<Socket>() ;
+- List<string> usernameList = new List<string>();
+
+**Functions**
+
+- public Form1()
+- private void StartButton_Click(object sender, EventArgs e)
+- private void StopButton_Click(object sender, EventArgs e)
+- private void Accept()
+- private void Receive(Socket thisClient) // updated
+- private bool CheckUsername(string username)
+- private void HandleClient(Socket client, string username)
+- private bool UploadCommand(Socket client, string commandMessage, string username, string filename)
+- private int GetCopyIdFromFileName(String fullname)
+- private string GetOriginalFileName(string fullname)
+- private bool DownloadCommand(Socket client, string commandMessage, string username, string filename)
+- private bool DeleteCommand(Socket client, string commandMessage, string username, string filename)
+- private bool CopyCommand(Socket client, string commandMessage, string username, string filename)
+- private bool ChangeAccessCommand(Socket client, string commandMessage, string username, string filename)
+- private bool GetFileCommand(Socket client, string commandMessage, string username, string filename)
+- private bool CheckOwnerFileValidity(string username, string filename, int incCount)
+- private string CheckPublicFileValidity(string filename, int incCount)
+- private string GetDirectoryFilename(string username, string filename)
+- private string GetDirectoryFileName(FileDB.PrimaryKey pk)
+- private void SendClientMessage(Socket client, string message)
+- private void RejectClient(Socket client, string username)
+- private void BrowseButton_Click(object sender, EventArgs e)
+- private bool CheckConnection(Socket socket)
+- private bool CheckEnd(Byte b)
+
 
 **Possible Issues in Server:**
 
@@ -113,18 +123,47 @@ UNIQUE (filename, owner)
 - uploadButton: start uploding file to server
 - outputBox: shows messages
 
+**Libraries**
+
+- using System;
+- using System.IO;
+- using System.Net;
+- using System.Net.Sockets;
+- using System.Text;
+- using System.Threading;
+- using System.Windows.Forms;
+- using System.Collections.Generic;
+
+**Globals**
+
+- int MAX_BUF = (2 << 22);
+- IPAddress serverIPAddress;
+- int serverPortNum;
+- string username;
+- string filepath;
+- bool connected = false;
+- Socket clientSocket;
+- string DOWNLOAD_DIR = "";
+- bool ACK_CHECK = false;
+- private static ManualResetEvent mre = new ManualResetEvent(false);
+
 **Functions**
 
-- void connectButton_Click(object sender, EventArgs e): starts connection -> sends username -> if "rejected" closes connection
-- void stopButton_Click(object sender, EventArgs e): stops connection
-- void button1_Click(object sender, EventArgs e): (browse button) opens file browser via openFileDialog1 sets uploadFileBox 
-- void uploadButton_Click(object sender, EventArgs e): checks connection and filepath; then relays to <ins>uploadFile()</ins>
-- void enableInputBoxes(): enables input boxes in thread safe manner.
--  void uploadFile(string filepath): sends "UPLOAD <filename>" command then filesize; after that starts to loop of read and send in a buffer with MAX_BUF sized 
-- void listenServer(): listens server and writes incoming messages to outputBox
-- bool checkConnection(Socket socket): checks connection by sending zero byte message
-- void safeLogWrite(string EventText): writes to  <ins>outputBox</ins> in a thread safe manner
-
+- public CLIENT()
+- private void ConnectButton_Click(object sender, EventArgs e)
+- private void StopButton_Click(object sender, EventArgs e)
+- private void EnableInputBoxes()
+- private void UploadFile(string filepath)
+- private void ListenServer()
+- private bool CheckConnection(Socket socket)
+- private void DownloadButton_Click(object sender, EventArgs e)
+- private void SendServerMessage(Socket server, string message)
+- private void GetFileButton_Click(object sender, EventArgs e)
+- private void DeleteButton_Click(object sender, EventArgs e)
+- private void ChangeAccessButton_Click(object sender, EventArgs e)
+- private bool DownloadFile(string filename, string downloadDirectory)
+- private bool GetFileList()
+- private static bool CheckEmptyString(String s)
 
 
 **Globals**
@@ -153,6 +192,7 @@ UNIQUE (filename, owner)
 - **Issue 8:** When Server is closed from cross when client threads running application is not really closed stays at line 151 -> fixed :+1:
 - **Issue 9:** Database insert is not working!! -> fixed :+1:
 - **Issue 10:** Server does not use thread safe GUI.
+- **Issue 11:** Download Command does not use number of bytes. 
 
 ## TESTS
 

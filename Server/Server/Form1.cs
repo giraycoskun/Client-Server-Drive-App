@@ -336,8 +336,8 @@ namespace Server
             SendClientMessage(client, ackMessage);
             //TODO fix naming
             FileDB.PrimaryKey tempPk = new FileDB.PrimaryKey(filename, username);
-            string absoluteFileName = Path.Combine(fileDirectory, tempPk.ToString());
-            FileStream uploadFile = System.IO.File.Create(absoluteFileName);
+            string directoryFileName = Path.Combine(fileDirectory, tempPk.ToString());
+            FileStream uploadFile = System.IO.File.Create(directoryFileName);
             Byte[] uploadFileBuffer = new Byte[MAX_BUF];
 
             Byte[] fileSizeBuffer = new Byte[64];
