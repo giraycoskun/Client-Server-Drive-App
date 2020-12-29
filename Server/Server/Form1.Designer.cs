@@ -89,10 +89,10 @@
             // 
             this.logBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.logBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.logBox.Location = new System.Drawing.Point(32, 355);
+            this.logBox.Location = new System.Drawing.Point(25, 355);
             this.logBox.Name = "logBox";
             this.logBox.ReadOnly = true;
-            this.logBox.Size = new System.Drawing.Size(533, 439);
+            this.logBox.Size = new System.Drawing.Size(527, 439);
             this.logBox.TabIndex = 4;
             this.logBox.Text = "";
             // 
@@ -165,8 +165,9 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoSize = true;
             this.BackColor = System.Drawing.SystemColors.ActiveBorder;
-            this.ClientSize = new System.Drawing.Size(601, 806);
+            this.ClientSize = new System.Drawing.Size(575, 819);
             this.Controls.Add(this.chooseButton);
             this.Controls.Add(this.stopButton);
             this.Controls.Add(this.startButton);

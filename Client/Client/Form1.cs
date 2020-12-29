@@ -468,7 +468,7 @@ namespace Client
                     }
                     else
                     {
-                        outputBox.AppendText("ERROR:Download Directory is not set \n");
+                        outputBox.AppendText("ERROR: Download Directory is not set \n");
                     }
                 }
                 else
@@ -654,7 +654,7 @@ namespace Client
                 }
                 else if (isFileBoxEmpty())
                 {
-                    outputBox.AppendText("ERROR: File Box isEmpty\n");
+                    outputBox.AppendText("ERROR: File Box is Empty\n");
                 }
                 else
                 {

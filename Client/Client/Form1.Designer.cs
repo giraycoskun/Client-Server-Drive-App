@@ -65,7 +65,7 @@
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.label1.Font = new System.Drawing.Font("Segoe Print", 14F);
-            this.label1.Location = new System.Drawing.Point(683, 76);
+            this.label1.Location = new System.Drawing.Point(814, 76);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(130, 49);
             this.label1.TabIndex = 0;
@@ -96,10 +96,10 @@
             // 
             this.outputBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.outputBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.outputBox.Location = new System.Drawing.Point(20, 153);
+            this.outputBox.Location = new System.Drawing.Point(12, 153);
             this.outputBox.Name = "outputBox";
             this.outputBox.ReadOnly = true;
-            this.outputBox.Size = new System.Drawing.Size(530, 430);
+            this.outputBox.Size = new System.Drawing.Size(703, 430);
             this.outputBox.TabIndex = 3;
             this.outputBox.Text = "";
             // 
@@ -169,7 +169,7 @@
             // 
             this.fileBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fileBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.fileBox.Location = new System.Drawing.Point(635, 224);
+            this.fileBox.Location = new System.Drawing.Point(766, 224);
             this.fileBox.Name = "fileBox";
             this.fileBox.Size = new System.Drawing.Size(198, 35);
             this.fileBox.TabIndex = 11;
@@ -178,7 +178,7 @@
             // 
             this.browseButton.BackColor = System.Drawing.SystemColors.Info;
             this.browseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.browseButton.Location = new System.Drawing.Point(635, 265);
+            this.browseButton.Location = new System.Drawing.Point(766, 265);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(198, 27);
             this.browseButton.TabIndex = 12;
@@ -196,7 +196,7 @@
             this.uploadButton.BackColor = System.Drawing.SystemColors.Info;
             this.uploadButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.uploadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.uploadButton.Location = new System.Drawing.Point(601, 321);
+            this.uploadButton.Location = new System.Drawing.Point(732, 321);
             this.uploadButton.Name = "uploadButton";
             this.uploadButton.Size = new System.Drawing.Size(120, 43);
             this.uploadButton.TabIndex = 13;
@@ -208,7 +208,7 @@
             // 
             this.downloadFolderBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.downloadFolderBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.downloadFolderBox.Location = new System.Drawing.Point(590, 548);
+            this.downloadFolderBox.Location = new System.Drawing.Point(721, 548);
             this.downloadFolderBox.Name = "downloadFolderBox";
             this.downloadFolderBox.Size = new System.Drawing.Size(291, 35);
             this.downloadFolderBox.TabIndex = 14;
@@ -217,7 +217,7 @@
             // 
             this.browseFolderButton.BackColor = System.Drawing.SystemColors.Info;
             this.browseFolderButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.browseFolderButton.Location = new System.Drawing.Point(635, 499);
+            this.browseFolderButton.Location = new System.Drawing.Point(766, 499);
             this.browseFolderButton.Name = "browseFolderButton";
             this.browseFolderButton.Size = new System.Drawing.Size(198, 32);
             this.browseFolderButton.TabIndex = 15;
@@ -229,7 +229,7 @@
             // 
             this.downloadButton.BackColor = System.Drawing.SystemColors.Info;
             this.downloadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.downloadButton.Location = new System.Drawing.Point(772, 321);
+            this.downloadButton.Location = new System.Drawing.Point(903, 321);
             this.downloadButton.Name = "downloadButton";
             this.downloadButton.Size = new System.Drawing.Size(120, 43);
             this.downloadButton.TabIndex = 17;
@@ -241,7 +241,7 @@
             // 
             this.deleteButton.BackColor = System.Drawing.SystemColors.Info;
             this.deleteButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.deleteButton.Location = new System.Drawing.Point(601, 370);
+            this.deleteButton.Location = new System.Drawing.Point(732, 370);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(120, 42);
             this.deleteButton.TabIndex = 18;
@@ -253,7 +253,7 @@
             // 
             this.copyButton.BackColor = System.Drawing.SystemColors.Info;
             this.copyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.copyButton.Location = new System.Drawing.Point(772, 370);
+            this.copyButton.Location = new System.Drawing.Point(903, 370);
             this.copyButton.Name = "copyButton";
             this.copyButton.Size = new System.Drawing.Size(120, 42);
             this.copyButton.TabIndex = 19;
@@ -265,7 +265,7 @@
             // 
             this.getFileButton.BackColor = System.Drawing.SystemColors.Info;
             this.getFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.getFileButton.Location = new System.Drawing.Point(635, 163);
+            this.getFileButton.Location = new System.Drawing.Point(766, 163);
             this.getFileButton.Name = "getFileButton";
             this.getFileButton.Size = new System.Drawing.Size(198, 46);
             this.getFileButton.TabIndex = 20;
@@ -277,7 +277,7 @@
             // 
             this.changeAccessButton.BackColor = System.Drawing.SystemColors.Info;
             this.changeAccessButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.changeAccessButton.Location = new System.Drawing.Point(635, 418);
+            this.changeAccessButton.Location = new System.Drawing.Point(766, 418);
             this.changeAccessButton.Name = "changeAccessButton";
             this.changeAccessButton.Size = new System.Drawing.Size(198, 42);
             this.changeAccessButton.TabIndex = 21;
@@ -288,7 +288,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::Client.Properties.Resources.cloud;
-            this.pictureBox1.Location = new System.Drawing.Point(635, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(766, 12);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(198, 133);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -321,7 +321,7 @@
             // 
             this.fileGroupBox.Controls.Add(this.publicFileRadioButton);
             this.fileGroupBox.Controls.Add(this.myfileRadioButton);
-            this.fileGroupBox.Location = new System.Drawing.Point(832, 151);
+            this.fileGroupBox.Location = new System.Drawing.Point(963, 151);
             this.fileGroupBox.Name = "fileGroupBox";
             this.fileGroupBox.Size = new System.Drawing.Size(116, 73);
             this.fileGroupBox.TabIndex = 25;
@@ -332,7 +332,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ClientSize = new System.Drawing.Size(956, 599);
+            this.ClientSize = new System.Drawing.Size(1079, 599);
             this.Controls.Add(this.fileGroupBox);
             this.Controls.Add(this.changeAccessButton);
             this.Controls.Add(this.getFileButton);

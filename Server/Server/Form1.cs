@@ -427,10 +427,10 @@ namespace Server
             //receive file -> receive client ACK
             //0_filename
             string ackMessage;
-            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
-            string directoryFileName = getDirectoryFilename(username, filename);
+            string ownerName = checkPublicFileValidity(GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = getDirectoryFilename(ownerName, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
-            if (checkFileValid && checkFileExist)
+            if ((ownerName != "" ) && checkFileExist)
             {
                 
 
@@ -481,7 +481,7 @@ namespace Server
             }
             else
             {   
-                if(!checkFileValid)
+                if(ownerName == "")
                 {
                     ackMessage = "ERR " + filename + " does not exist in database!";
                 }
@@ -499,7 +499,7 @@ namespace Server
         private bool deleteCommand(Socket client, string commandMessage, string username, string filename)
         {
             string ackMessage;
-            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            bool checkFileValid = checkOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
             string directoryFileName = getDirectoryFilename(username, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if (checkFileValid && checkFileExist)
@@ -545,7 +545,7 @@ namespace Server
         private bool copyCommand(Socket client, string commandMessage, string username, string filename)
         {
             string ackMessage;
-            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            bool checkFileValid = checkOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
             string directoryFileName = getDirectoryFilename(username, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if (checkFileValid && checkFileExist)
@@ -595,7 +595,7 @@ namespace Server
         private bool changeAccessCommand(Socket client, string commandMessage, string username, string filename)
         {
             string ackMessage;
-            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            bool checkFileValid = checkOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
             string directoryFileName = getDirectoryFilename(username, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if (checkFileValid && checkFileExist)
@@ -669,7 +669,7 @@ namespace Server
                         FileInfo info = new FileInfo(fileDirectoryName);
                         long length = info.Length;
 
-                        string tempFilename = "Name: " + fileList[temp].Counter +"."+ fileList[temp].FileName + " | Size: " + length.ToString() + " | Time:" +fileList[temp].UploadDateTime.ToString() + " | Acces: "+ fileList[temp].FileAccessType.ToString() +"\n";
+                        string tempFilename ="Owner: " + fileList[temp].Owner + " | Name: " + fileList[temp].Counter +"."+ fileList[temp].FileName + " | Size: " + length.ToString() + " | Time:" +fileList[temp].UploadDateTime.ToString() + " | Acces: "+ fileList[temp].FileAccessType.ToString() +"\n";
                         Byte[] getFileBuffer = Encoding.Default.GetBytes(tempFilename);
                         n = client.Send(getFileBuffer);
                     }
@@ -693,7 +693,7 @@ namespace Server
             return true;
         }
 
-        private bool checkFileValidity(string username, string filename, int incCount)
+        private bool checkOwnerFileValidity(string username, string filename, int incCount)
         {
             //Database functionality
             FileDB.PrimaryKey pk = new FileDB.PrimaryKey(filename, username, incCount);
@@ -705,11 +705,30 @@ namespace Server
             return true;
         }
 
+        private string checkPublicFileValidity(string filename, int incCount)
+        {
+            List<File> publicFiles = FileDB.GetFilesByAccessType();
+            foreach (File file in publicFiles)
+            {
+                if(file.FileName == filename && file.Counter == incCount)
+                {
+                    return file.Owner;
+                }
+            }
+            return "";
+        }
+
         private string getDirectoryFilename(string username, string filename)
         {
             //TODO: Database Functionality
             string absFilename = Path.Combine(fileDirectory,(username + "." + filename));
             return absFilename;
+        }
+
+        private string getDirectoryFileName(FileDB.PrimaryKey pk)
+        {
+            string filename = pk.Owner + "." + pk.IncCount.ToString() + "." + pk.FileName;
+            return (Path.Combine(fileDirectory, filename));
         }
 
         private void sendClientMessage(Socket client, string message)
