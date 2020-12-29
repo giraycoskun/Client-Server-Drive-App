@@ -45,7 +45,7 @@ namespace Server
 
         }
 
-        private void startButton_Click(object sender, EventArgs e)
+        private void StartButton_Click(object sender, EventArgs e)
         {
             bool input_check = true;
             string port = portBox.Text;
@@ -107,7 +107,7 @@ namespace Server
 
         }
 
-        private void stopButton_Click(object sender, EventArgs e)
+        private void StopButton_Click(object sender, EventArgs e)
         {
             try
             {
@@ -170,6 +170,7 @@ namespace Server
                 }
             }
         }
+
         private void Receive(Socket thisClient) // updated
         {
             string username = "";
@@ -191,24 +192,25 @@ namespace Server
                 listening = false;
                 return;
             }
-            bool result = checkUsername(username);
+            bool result = CheckUsername(username);
             if (result)
             {
                 usernameList.Add(username);
                 logBox.AppendText("Client is Accepted: HI " + username + "\n");
                 //logBox.AppendText(usernameList.ToString()+"\n");
-                handleClient(thisClient, username);
+                HandleClient(thisClient, username);
             }
             else
             {
-                rejectClient(thisClient, username);
+                RejectClient(thisClient, username);
                 thisClient.Shutdown(SocketShutdown.Both);
                 thisClient.Close();
                 logBox.AppendText("Client is Rejected: " + username + "\n");
                 clientSocketList.Remove(thisClient);
             }
         }
-        private bool checkUsername(string username)
+
+        private bool CheckUsername(string username)
         {
             bool result = true;
             
@@ -219,7 +221,7 @@ namespace Server
             return result;
         }
 
-        private void handleClient(Socket client, string username)
+        private void HandleClient(Socket client, string username)
         {
             try
             {
@@ -232,7 +234,7 @@ namespace Server
                 logBox.AppendText($"ERROR: hi message from server to client {username} could not sent!!\n");
             }
             
-            while(checkConnection(client))
+            while(CheckConnection(client))
             {
                 string commandMessage = "";
                 string command = "";
@@ -271,7 +273,7 @@ namespace Server
 
                 if (command == "UPLOAD")
                 {
-                    bool result = uploadCommand(client, commandMessage, username, filename);
+                    bool result = UploadCommand(client, commandMessage, username, filename);
                     if(! result)
                     {
                         break;
@@ -279,7 +281,7 @@ namespace Server
                 }
                 else if(command == "DOWNLOAD")
                 {
-                    bool result = downloadCommand(client, commandMessage, username, filename);
+                    bool result = DownloadCommand(client, commandMessage, username, filename);
                     if (!result)
                     {
                         break;
@@ -287,7 +289,7 @@ namespace Server
                 }
                 else if(command == "DELETE")
                 {
-                    bool result = deleteCommand(client, commandMessage, username, filename);
+                    bool result = DeleteCommand(client, commandMessage, username, filename);
                     if (!result)
                     {
                         break;
@@ -295,7 +297,7 @@ namespace Server
                 }
                 else if(command == "COPY")
                 {
-                    bool result = copyCommand(client, commandMessage, username, filename);
+                    bool result = CopyCommand(client, commandMessage, username, filename);
                     if (!result)
                     {
                         break;
@@ -303,7 +305,7 @@ namespace Server
                 }
                 else if (command == "GETFILE")
                 {
-                    bool result = getFileCommand(client, commandMessage, username, filename);
+                    bool result = GetFileCommand(client, commandMessage, username, filename);
                     if (!result)
                     {
                         break;
@@ -311,7 +313,7 @@ namespace Server
                 }
                 else if (command == "CH_ACCESS")
                 {
-                    bool result = changeAccessCommand(client, commandMessage, username, filename);
+                    bool result = ChangeAccessCommand(client, commandMessage, username, filename);
                     if (!result)
                     {
                         break;
@@ -327,11 +329,11 @@ namespace Server
             clientSocketList.Remove(client);
         }
 
-        private bool uploadCommand(Socket client, string commandMessage, string username, string filename)
+        private bool UploadCommand(Socket client, string commandMessage, string username, string filename)
         {
             bool fileUploadError = false;
             string ackMessage = "ACK " + commandMessage;
-            sendClientMessage(client, ackMessage);
+            SendClientMessage(client, ackMessage);
             //TODO fix naming
             FileDB.PrimaryKey tempPk = new FileDB.PrimaryKey(filename, username);
             string absoluteFileName = Path.Combine(fileDirectory, tempPk.ToString());
@@ -363,7 +365,7 @@ namespace Server
                     int numBytes = client.Receive(uploadFileBuffer);
                     numBytesRead += (ulong)numBytes;
 
-                    int index = Array.FindIndex(uploadFileBuffer, checkEnd);
+                    int index = Array.FindIndex(uploadFileBuffer, CheckEnd);
 
                     if (index > -1)
                     {
@@ -389,10 +391,10 @@ namespace Server
             if (!fileUploadError)
             {
                 FileDB.PrimaryKey newPK = new FileDB.PrimaryKey(filename, username);
-                FileDB.InsertFile(newPK, Path.Combine(fileDirectory, filename));
+                FileDB.InsertFile(newPK, Path.Combine(fileDirectory, (newPK.ToString())));
                 logBox.AppendText($"File {newPK.ToString()} UPLOADED\n");
                 string message = newPK.IncCount + "." + newPK.FileName + " UPLOADED";
-                sendClientMessage(client, message);
+                SendClientMessage(client, message);
             }
             return true;
         }
@@ -421,21 +423,22 @@ namespace Server
                 return "";
             }
         }
-        private bool downloadCommand(Socket client, string commandMessage, string username, string filename)
+
+        private bool DownloadCommand(Socket client, string commandMessage, string username, string filename)
         {
             //command - filename
             //receive file -> receive client ACK
             //0_filename
             string ackMessage;
-            string ownerName = checkPublicFileValidity(GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
-            string directoryFileName = getDirectoryFilename(ownerName, filename);
+            string ownerName = CheckPublicFileValidity(GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = GetDirectoryFilename(ownerName, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if ((ownerName != "" ) && checkFileExist)
             {
                 
 
                 ackMessage = "ACK " + commandMessage;
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
 
                 Byte[] downloadBuffer = new Byte[MAX_BUF];
                 try
@@ -490,22 +493,22 @@ namespace Server
                     ackMessage = "ERR " + filename + " does not exist in directory!";
                 }
                 
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
                 logBox.AppendText("Server: " + ackMessage +"\n");
             }
             return true;
         }
 
-        private bool deleteCommand(Socket client, string commandMessage, string username, string filename)
+        private bool DeleteCommand(Socket client, string commandMessage, string username, string filename)
         {
             string ackMessage;
-            bool checkFileValid = checkOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
-            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileValid = CheckOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = GetDirectoryFilename(username, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if (checkFileValid && checkFileExist)
             {
                 ackMessage = "ACK " + commandMessage;
-                sendClientMessage(client, ackMessage);              
+                SendClientMessage(client, ackMessage);              
                 try
                 {
 
@@ -515,7 +518,7 @@ namespace Server
 
                     string outMessage = "File Delete Finished";
                     logBox.AppendText("Server: "+outMessage+"\n");
-                    sendClientMessage(client, outMessage);
+                    SendClientMessage(client, outMessage);
                 }
                 catch (Exception except)
                 {
@@ -536,22 +539,22 @@ namespace Server
                     ackMessage = "ERR " + filename + " does not exist in directory!";
                 }
 
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
                 logBox.AppendText("Server: " + ackMessage + "\n");
             }
             return true;
         }
 
-        private bool copyCommand(Socket client, string commandMessage, string username, string filename)
+        private bool CopyCommand(Socket client, string commandMessage, string username, string filename)
         {
             string ackMessage;
-            bool checkFileValid = checkOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
-            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileValid = CheckOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = GetDirectoryFilename(username, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if (checkFileValid && checkFileExist)
             {
                 ackMessage = "ACK " + commandMessage;
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
                 try
                 {
                     FileDB.PrimaryKey originalPk = new FileDB.PrimaryKey(GetOriginalFileName(filename), username, GetCopyIdFromFileName(filename));
@@ -565,7 +568,7 @@ namespace Server
 
                     string outMessage = "File Copy Finished";
                     logBox.AppendText("Server: " + outMessage + "\n");
-                    sendClientMessage(client, outMessage);
+                    SendClientMessage(client, outMessage);
                 }
                 catch (Exception except)
                 {
@@ -586,22 +589,22 @@ namespace Server
                     ackMessage = "ERR " + filename + " does not exist in directory!";
                 }
 
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
                 logBox.AppendText("Server: " + ackMessage + "\n");
             }
             return true;
         }
 
-        private bool changeAccessCommand(Socket client, string commandMessage, string username, string filename)
+        private bool ChangeAccessCommand(Socket client, string commandMessage, string username, string filename)
         {
             string ackMessage;
-            bool checkFileValid = checkOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
-            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileValid = CheckOwnerFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = GetDirectoryFilename(username, filename);
             bool checkFileExist = System.IO.File.Exists(directoryFileName);
             if (checkFileValid && checkFileExist)
             {
                 ackMessage = "ACK " + commandMessage;
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
                 try
                 {
                     FileDB.PrimaryKey tempPk = new FileDB.PrimaryKey(GetOriginalFileName(filename), username, GetCopyIdFromFileName(filename));
@@ -609,7 +612,7 @@ namespace Server
 
                     string outMessage = "File Change Access Finished";
                     logBox.AppendText("Server: " + outMessage + "\n");
-                    sendClientMessage(client, outMessage);
+                    SendClientMessage(client, outMessage);
                 }
                 catch (Exception except)
                 {
@@ -630,17 +633,17 @@ namespace Server
                     ackMessage = "ERR " + filename + " does not exist in directory!";
                 }
 
-                sendClientMessage(client, ackMessage);
+                SendClientMessage(client, ackMessage);
                 logBox.AppendText("Server: " + ackMessage + "\n");
             }
             return true;
         }
 
-        private bool getFileCommand(Socket client, string commandMessage, string username, string filename)
+        private bool GetFileCommand(Socket client, string commandMessage, string username, string filename)
         {
 
             string ackMessage = "ACK " + commandMessage;
-            sendClientMessage(client, ackMessage);
+            SendClientMessage(client, ackMessage);
 
             List<File> fileList;
             if(filename == "ME")
@@ -693,7 +696,7 @@ namespace Server
             return true;
         }
 
-        private bool checkOwnerFileValidity(string username, string filename, int incCount)
+        private bool CheckOwnerFileValidity(string username, string filename, int incCount)
         {
             //Database functionality
             FileDB.PrimaryKey pk = new FileDB.PrimaryKey(filename, username, incCount);
@@ -705,7 +708,7 @@ namespace Server
             return true;
         }
 
-        private string checkPublicFileValidity(string filename, int incCount)
+        private string CheckPublicFileValidity(string filename, int incCount)
         {
             List<File> publicFiles = FileDB.GetFilesByAccessType();
             foreach (File file in publicFiles)
@@ -718,20 +721,20 @@ namespace Server
             return "";
         }
 
-        private string getDirectoryFilename(string username, string filename)
+        private string GetDirectoryFilename(string username, string filename)
         {
             //TODO: Database Functionality
             string absFilename = Path.Combine(fileDirectory,(username + "." + filename));
             return absFilename;
         }
 
-        private string getDirectoryFileName(FileDB.PrimaryKey pk)
+        private string GetDirectoryFileName(FileDB.PrimaryKey pk)
         {
             string filename = pk.Owner + "." + pk.IncCount.ToString() + "." + pk.FileName;
             return (Path.Combine(fileDirectory, filename));
         }
 
-        private void sendClientMessage(Socket client, string message)
+        private void SendClientMessage(Socket client, string message)
         {
             try
             {
@@ -744,7 +747,7 @@ namespace Server
             }
         }
 
-        private void rejectClient(Socket client, string username)
+        private void RejectClient(Socket client, string username)
         {
             try
             {
@@ -758,7 +761,7 @@ namespace Server
             }
         }
 
-        private void browseButton_Click(object sender, EventArgs e)
+        private void BrowseButton_Click(object sender, EventArgs e)
         {
             string temp = "";
             fileBox.Enabled = true;
@@ -780,7 +783,7 @@ namespace Server
             }
         }
 
-        private bool checkConnection(Socket socket)
+        private bool CheckConnection(Socket socket)
         {
             if (listening)
             {
@@ -818,7 +821,7 @@ namespace Server
             }
         }
 
-        private bool checkEnd(Byte b)
+        private bool CheckEnd(Byte b)
         {
             if(b=='\0')
             {

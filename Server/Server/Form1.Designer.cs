@@ -125,7 +125,7 @@
             this.startButton.TabIndex = 7;
             this.startButton.Text = "START";
             this.startButton.UseVisualStyleBackColor = false;
-            this.startButton.Click += new System.EventHandler(this.startButton_Click);
+            this.startButton.Click += new System.EventHandler(this.StartButton_Click);
             // 
             // stopButton
             // 
@@ -137,7 +137,7 @@
             this.stopButton.TabIndex = 8;
             this.stopButton.Text = "STOP";
             this.stopButton.UseVisualStyleBackColor = false;
-            this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
+            this.stopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // chooseButton
             // 
@@ -149,7 +149,7 @@
             this.chooseButton.TabIndex = 9;
             this.chooseButton.Text = "Choose";
             this.chooseButton.UseVisualStyleBackColor = false;
-            this.chooseButton.Click += new System.EventHandler(this.browseButton_Click);
+            this.chooseButton.Click += new System.EventHandler(this.BrowseButton_Click);
             // 
             // pictureBox1
             // 

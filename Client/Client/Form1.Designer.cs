@@ -131,7 +131,7 @@
             this.connectButton.TabIndex = 6;
             this.connectButton.Text = "CONNECT";
             this.connectButton.UseVisualStyleBackColor = false;
-            this.connectButton.Click += new System.EventHandler(this.connectButton_Click);
+            this.connectButton.Click += new System.EventHandler(this.ConnectButton_Click);
             // 
             // stopButton
             // 
@@ -144,7 +144,7 @@
             this.stopButton.TabIndex = 7;
             this.stopButton.Text = "STOP";
             this.stopButton.UseVisualStyleBackColor = false;
-            this.stopButton.Click += new System.EventHandler(this.stopButton_Click);
+            this.stopButton.Click += new System.EventHandler(this.StopButton_Click);
             // 
             // usernameBox
             // 
@@ -184,12 +184,11 @@
             this.browseButton.TabIndex = 12;
             this.browseButton.Text = "Choose File";
             this.browseButton.UseVisualStyleBackColor = false;
-            this.browseButton.Click += new System.EventHandler(this.chooseFileButton_Click);
+            this.browseButton.Click += new System.EventHandler(this.ChooseFileButton_Click);
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
             // 
             // uploadButton
             // 
@@ -202,7 +201,7 @@
             this.uploadButton.TabIndex = 13;
             this.uploadButton.Text = "UPLOAD";
             this.uploadButton.UseVisualStyleBackColor = false;
-            this.uploadButton.Click += new System.EventHandler(this.uploadButton_Click);
+            this.uploadButton.Click += new System.EventHandler(this.UploadButton_Click);
             // 
             // downloadFolderBox
             // 
@@ -223,7 +222,7 @@
             this.browseFolderButton.TabIndex = 15;
             this.browseFolderButton.Text = "Choose Download Folder";
             this.browseFolderButton.UseVisualStyleBackColor = false;
-            this.browseFolderButton.Click += new System.EventHandler(this.browseFolderButton_Click);
+            this.browseFolderButton.Click += new System.EventHandler(this.BrowseFolderButton_Click);
             // 
             // downloadButton
             // 
@@ -235,7 +234,7 @@
             this.downloadButton.TabIndex = 17;
             this.downloadButton.Text = "DOWNLOAD";
             this.downloadButton.UseVisualStyleBackColor = false;
-            this.downloadButton.Click += new System.EventHandler(this.downloadButton_Click);
+            this.downloadButton.Click += new System.EventHandler(this.DownloadButton_Click);
             // 
             // deleteButton
             // 
@@ -247,7 +246,7 @@
             this.deleteButton.TabIndex = 18;
             this.deleteButton.Text = "DELETE";
             this.deleteButton.UseVisualStyleBackColor = false;
-            this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
+            this.deleteButton.Click += new System.EventHandler(this.DeleteButton_Click);
             // 
             // copyButton
             // 
@@ -259,7 +258,7 @@
             this.copyButton.TabIndex = 19;
             this.copyButton.Text = "COPY";
             this.copyButton.UseVisualStyleBackColor = false;
-            this.copyButton.Click += new System.EventHandler(this.copyButton_Click);
+            this.copyButton.Click += new System.EventHandler(this.CopyButton_Click);
             // 
             // getFileButton
             // 
@@ -271,7 +270,7 @@
             this.getFileButton.TabIndex = 20;
             this.getFileButton.Text = "GET FILES";
             this.getFileButton.UseVisualStyleBackColor = false;
-            this.getFileButton.Click += new System.EventHandler(this.getFileButton_Click);
+            this.getFileButton.Click += new System.EventHandler(this.GetFileButton_Click);
             // 
             // changeAccessButton
             // 
@@ -283,7 +282,7 @@
             this.changeAccessButton.TabIndex = 21;
             this.changeAccessButton.Text = "CHANGE ACCESS";
             this.changeAccessButton.UseVisualStyleBackColor = false;
-            this.changeAccessButton.Click += new System.EventHandler(this.changeAccessButton_Click);
+            this.changeAccessButton.Click += new System.EventHandler(this.ChangeAccessButton_Click);
             // 
             // pictureBox1
             // 
