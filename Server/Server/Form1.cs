@@ -286,13 +286,37 @@ namespace Server
                     }
                 }
                 else if(command == "DELETE")
-                { }
+                {
+                    bool result = deleteCommand(client, commandMessage, username, filename);
+                    if (!result)
+                    {
+                        break;
+                    }
+                }
                 else if(command == "COPY")
-                { }
+                {
+                    bool result = copyCommand(client, commandMessage, username, filename);
+                    if (!result)
+                    {
+                        break;
+                    }
+                }
                 else if (command == "GETFILE")
-                { }
+                {
+                    bool result = getFileCommand(client, commandMessage, username, filename);
+                    if (!result)
+                    {
+                        break;
+                    }
+                }
                 else if (command == "CH_ACCESS")
-                { }
+                {
+                    bool result = changeAccessCommand(client, commandMessage, username, filename);
+                    if (!result)
+                    {
+                        break;
+                    }
+                }
                 else
                 {
                     logBox.AppendText($"Unknown Command: {command}\n");
@@ -308,8 +332,10 @@ namespace Server
             bool fileUploadError = false;
             string ackMessage = "ACK " + commandMessage;
             sendClientMessage(client, ackMessage);
-
-            FileStream uploadFile = System.IO.File.Create(Path.Combine(fileDirectory, filename));
+            //TODO fix naming
+            FileDB.PrimaryKey tempPk = new FileDB.PrimaryKey(filename, username);
+            string absoluteFileName = Path.Combine(fileDirectory, tempPk.ToString());
+            FileStream uploadFile = System.IO.File.Create(absoluteFileName);
             Byte[] uploadFileBuffer = new Byte[MAX_BUF];
 
             Byte[] fileSizeBuffer = new Byte[64];
@@ -331,8 +357,6 @@ namespace Server
             //sendClientMessage(client, "ACK");
             while (fileSize > numBytesRead)
             {
-                if (fileSize == numBytesRead)
-                    logBox.AppendText("DEBUG");
                 try
                 {
 
@@ -366,7 +390,7 @@ namespace Server
             {
                 FileDB.PrimaryKey newPK = new FileDB.PrimaryKey(filename, username);
                 FileDB.InsertFile(newPK, Path.Combine(fileDirectory, filename));
-                logBox.AppendText($"File {filename} UPLOADED\n");
+                logBox.AppendText($"File {newPK.ToString()} UPLOADED\n");
                 string message = filename + " UPLOADED";
                 sendClientMessage(client, message);
             }
@@ -383,16 +407,32 @@ namespace Server
 
             return  -1;
         }
+
+        private string GetOriginalFileName(string fullname)
+        {
+            try
+            {
+                int index = fullname.IndexOf('.');
+                string filename = fullname.Substring(index + 1);
+                return filename;
+            }
+            catch
+            {
+                return "";
+            }
+        }
         private bool downloadCommand(Socket client, string commandMessage, string username, string filename)
         {
             //command - filename
             //receive file -> receive client ACK
             //0_filename
             string ackMessage;
-            bool checkFileValid = checkFileValidity(username, filename, GetCopyIdFromFileName(filename));
-            if (checkFileValid)
+            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileExist = System.IO.File.Exists(directoryFileName);
+            if (checkFileValid && checkFileExist)
             {
-                string absoulteFileName = getAbsoluteFilename(username, filename);
+                
 
                 ackMessage = "ACK " + commandMessage;
                 sendClientMessage(client, ackMessage);
@@ -403,7 +443,7 @@ namespace Server
 
                     //clientSocket.SendFile(filepath);
                     // StreamReader sr = new StreamReader("TestFile.txt")
-                    using (FileStream fsSource = new FileStream(absoulteFileName, FileMode.Open, FileAccess.Read))
+                    using (FileStream fsSource = new FileStream(directoryFileName, FileMode.Open, FileAccess.Read))
                     {
                         int n, temp;
 
@@ -440,17 +480,226 @@ namespace Server
                 }
             }
             else
-            {
-                ackMessage = "ERR" + filename;
+            {   
+                if(!checkFileValid)
+                {
+                    ackMessage = "ERR " + filename + " does not exist in database!";
+                }
+                else
+                {
+                    ackMessage = "ERR " + filename + " does not exist in directory!";
+                }
+                
                 sendClientMessage(client, ackMessage);
+                logBox.AppendText("Server: " + ackMessage +"\n");
             }
             return true;
         }
+
+        private bool deleteCommand(Socket client, string commandMessage, string username, string filename)
+        {
+            string ackMessage;
+            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileExist = System.IO.File.Exists(directoryFileName);
+            if (checkFileValid && checkFileExist)
+            {
+                ackMessage = "ACK " + commandMessage;
+                sendClientMessage(client, ackMessage);              
+                try
+                {
+
+                    System.IO.File.Delete(directoryFileName);
+                    FileDB.PrimaryKey pk = new FileDB.PrimaryKey(GetOriginalFileName(filename), username, GetCopyIdFromFileName(filename));
+                    FileDB.DeleteFile(pk);
+
+                    string outMessage = "File Delete Finished";
+                    logBox.AppendText("Server: "+outMessage+"\n");
+                    sendClientMessage(client, outMessage);
+                }
+                catch (Exception except)
+                {
+                    logBox.AppendText("Error: during file delete operation.\n");
+                    logBox.AppendText("Connection Stopped\n");
+                    client.Close();
+                    return false;
+                }
+            }
+            else
+            {
+                if (!checkFileValid)
+                {
+                    ackMessage = "ERR " + filename + " does not exist in database!";
+                }
+                else
+                {
+                    ackMessage = "ERR " + filename + " does not exist in directory!";
+                }
+
+                sendClientMessage(client, ackMessage);
+                logBox.AppendText("Server: " + ackMessage + "\n");
+            }
+            return true;
+        }
+
+        private bool copyCommand(Socket client, string commandMessage, string username, string filename)
+        {
+            string ackMessage;
+            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileExist = System.IO.File.Exists(directoryFileName);
+            if (checkFileValid && checkFileExist)
+            {
+                ackMessage = "ACK " + commandMessage;
+                sendClientMessage(client, ackMessage);
+                try
+                {
+                    FileDB.PrimaryKey originalPk = new FileDB.PrimaryKey(GetOriginalFileName(filename), username, GetCopyIdFromFileName(filename));
+                    FileDB.PrimaryKey copyPk = new FileDB.PrimaryKey(GetOriginalFileName(filename), username);
+                    File originalFile = FileDB.GetFileByKey(originalPk);
+                    string originalFileName = Path.Combine(fileDirectory, originalPk.ToString());
+                    string copyFileName = Path.Combine(fileDirectory, copyPk.ToString());
+                    System.IO.File.Copy(originalFileName, copyFileName);
+                    FileDB.InsertFile(copyPk, Path.Combine(fileDirectory, copyFileName), originalFile.FileAccessType);
+
+
+                    string outMessage = "File Copy Finished";
+                    logBox.AppendText("Server: " + outMessage + "\n");
+                    sendClientMessage(client, outMessage);
+                }
+                catch (Exception except)
+                {
+                    logBox.AppendText("Error: during file copy operation.\n");
+                    logBox.AppendText("Connection Stopped\n");
+                    client.Close();
+                    return false;
+                }
+            }
+            else
+            {
+                if (!checkFileValid)
+                {
+                    ackMessage = "ERR " + filename + " does not exist in database!";
+                }
+                else
+                {
+                    ackMessage = "ERR " + filename + " does not exist in directory!";
+                }
+
+                sendClientMessage(client, ackMessage);
+                logBox.AppendText("Server: " + ackMessage + "\n");
+            }
+            return true;
+        }
+
+        private bool changeAccessCommand(Socket client, string commandMessage, string username, string filename)
+        {
+            string ackMessage;
+            bool checkFileValid = checkFileValidity(username, GetOriginalFileName(filename), GetCopyIdFromFileName(filename));
+            string directoryFileName = getDirectoryFilename(username, filename);
+            bool checkFileExist = System.IO.File.Exists(directoryFileName);
+            if (checkFileValid && checkFileExist)
+            {
+                ackMessage = "ACK " + commandMessage;
+                sendClientMessage(client, ackMessage);
+                try
+                {
+                    FileDB.PrimaryKey tempPk = new FileDB.PrimaryKey(GetOriginalFileName(filename), username, GetCopyIdFromFileName(filename));
+                    FileDB.UpdateAccessType(tempPk, File.AccessType.PUBLIC);
+
+                    string outMessage = "File Change Access Finished";
+                    logBox.AppendText("Server: " + outMessage + "\n");
+                    sendClientMessage(client, outMessage);
+                }
+                catch (Exception except)
+                {
+                    logBox.AppendText("Error: during change access operation.\n");
+                    logBox.AppendText("Connection Stopped\n");
+                    client.Close();
+                    return false;
+                }
+            }
+            else
+            {
+                if (!checkFileValid)
+                {
+                    ackMessage = "ERR " + filename + " does not exist in database!";
+                }
+                else
+                {
+                    ackMessage = "ERR " + filename + " does not exist in directory!";
+                }
+
+                sendClientMessage(client, ackMessage);
+                logBox.AppendText("Server: " + ackMessage + "\n");
+            }
+            return true;
+        }
+
+        private bool getFileCommand(Socket client, string commandMessage, string username, string filename)
+        {
+
+            string ackMessage = "ACK " + commandMessage;
+            sendClientMessage(client, ackMessage);
+
+            List<File> fileList;
+            if(filename == "ME")
+            {
+                fileList = FileDB.GetFilesByOwner(username);
+            }
+            else
+            {
+                fileList = FileDB.GetFilesByAccessType();
+            }
+
+            try
+            {
+                int n, temp = 0;
+                int fileCount = fileList.Count();
+
+                if(fileCount == 0)
+                {
+                    string fileListEmptyStrig = "File List is Empty";
+                    Byte[] getFileBuffer = Encoding.Default.GetBytes(fileListEmptyStrig);
+                    n = client.Send(getFileBuffer);
+                }
+
+                while (temp < fileCount)
+                {
+                    string fileDirectoryName = Path.Combine(fileDirectory,(username + "." + fileList[temp].Counter.ToString() + "." + fileList[temp].FileName));
+                    FileInfo info = new FileInfo(fileDirectoryName);
+                    long length = info.Length;
+
+                    string tempFilename = "Name: " + fileList[temp].Counter +"."+ fileList[temp].FileName + " Size: " + length.ToString() + " Time:" +fileList[temp].UploadDateTime.ToString() +"\n";
+                    Byte[] getFileBuffer = Encoding.Default.GetBytes(tempFilename);
+                    n = client.Send(getFileBuffer);
+
+                    temp += 1;
+                }
+
+                
+                logBox.AppendText("Server: File List Sending Finished\n");
+                Byte[] clientAckBuffer = new Byte[64];
+                int clientAckN = client.Receive(clientAckBuffer);
+                string clientAckMessage = Encoding.Default.GetString(clientAckBuffer);
+                clientAckMessage = clientAckMessage.TrimEnd('\0');
+                logBox.AppendText("Client: " + clientAckMessage + "\n");
+            }
+            catch (Exception except)
+            {
+                logBox.AppendText("Error: during file list sending.\n");
+                logBox.AppendText("Connection Stopped \n");
+                client.Close();
+                return false;
+            }
+            return true;
+        }
+
         private bool checkFileValidity(string username, string filename, int incCount)
         {
-            //TODO: Database functionality
-            FileDB.PrimaryKey pk = new FileDB.PrimaryKey(username, filename, incCount);
-            if (FileDB.GetFileByKey(pk).Equals(null))
+            //Database functionality
+            FileDB.PrimaryKey pk = new FileDB.PrimaryKey(filename, username, incCount);
+            if (FileDB.GetFileByKey(pk) == null)//FileDB.GetFileByKey(pk).Equals(null)
             {
                 return false;
             }
@@ -458,10 +707,10 @@ namespace Server
             return true;
         }
 
-        private string getAbsoluteFilename(string username, string filename)
+        private string getDirectoryFilename(string username, string filename)
         {
             //TODO: Database Functionality
-            string absFilename = Path.Combine(fileDirectory, filename);
+            string absFilename = Path.Combine(fileDirectory,(username + "." + filename));
             return absFilename;
         }
 

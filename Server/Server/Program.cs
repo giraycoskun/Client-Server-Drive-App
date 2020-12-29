@@ -100,7 +100,7 @@ namespace Server
                     IncCount = GetNextIncCount(fileName, owner);
                 }
             }
-            public override string ToString() => $"({FileName}, {Owner}, {IncCount})";
+            public override string ToString() => $"{Owner}.{IncCount}.{FileName}";
         }
 
         //Singleton (Lazy Initilization)

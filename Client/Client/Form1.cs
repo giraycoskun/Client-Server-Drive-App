@@ -386,19 +386,7 @@ namespace Client
             outputBox.AppendText(EventText);
         }
 
-        public void safeLogWrite(List<string> EventText)
-        {
-            if (outputBox.InvokeRequired)
-            {
-                outputBox.BeginInvoke(new Action(delegate
-                {
-                    safeLogWrite(EventText);
-                }));
-                return;
-            }
-            outputBox.Lines = EventText.ToArray();
-            outputBox.AppendText("\n");
-        }
+        
 
         private void copyButton_Click(object sender, EventArgs e)
         {
@@ -418,9 +406,8 @@ namespace Client
                     outputBox.AppendText("Cannot copy without connection.\n");
                 }
 
-                if (connection)
+                if (connection && (!isFileBoxEmpty()))
                 {
-                    fileBox.Enabled = false;
                     string copyFilename = fileBox.Text;
 
                     string commandMessage = "COPY" + " " + copyFilename;
@@ -429,6 +416,10 @@ namespace Client
                     Array.Resize(ref commandBuffer, 64); //TODO: is it necessary?
                     clientSocket.Send(commandBuffer);
                     
+                }
+                else if(isFileBoxEmpty())
+                {
+                    outputBox.AppendText("ERROR: File Box is Empty\n");
                 }
                 else
                 {
@@ -458,7 +449,7 @@ namespace Client
                     outputBox.AppendText("Cannot download without connection.\n");
                 }
 
-                if (connection)
+                if (connection && (!isFileBoxEmpty()))
                 {
                     fileBox.Enabled = false;
                     string downloadFilename = fileBox.Text;
@@ -472,6 +463,10 @@ namespace Client
                         commandBuffer = Encoding.Default.GetBytes(commandMessage);
                         Array.Resize(ref commandBuffer, 64);
                         clientSocket.Send(commandBuffer);
+                    }
+                    else if(isFileBoxEmpty())
+                    {
+                        outputBox.AppendText("ERROR:File Name is Empty\n");
                     }
                     else
                     {
@@ -606,10 +601,9 @@ namespace Client
                     outputBox.AppendText("Cannot delete without connection.\n");
                 }
 
-                if (connection)
+                if (connection && (!isFileBoxEmpty()))
                 {
-                    fileBox.Enabled = false;
-                    string deleteFilename = fileBox.Text;
+                    string deleteFilename = fileBox.Text;                  
 
                     string commandMessage = "DELETE" + " " + deleteFilename;
                     Byte[] commandBuffer = new Byte[64];
@@ -617,9 +611,13 @@ namespace Client
                     Array.Resize(ref commandBuffer, 64); //TODO: is it necesarry
                     clientSocket.Send(commandBuffer);
                 }
+                else if(isFileBoxEmpty())
+                {
+                    outputBox.AppendText("ERROR: File Name is Empty\n");
+                }
                 else
                 {
-                    outputBox.AppendText("ERROR: NOT CONNECTED\n");
+                    outputBox.AppendText("ERROR: Not Connected\n");
                     enableInputBoxes();
                     clientSocket.Close();
                 }
@@ -645,9 +643,9 @@ namespace Client
                     outputBox.AppendText("Cannot change access without connection.\n");
                 }
 
-                if (connection)
+                if (connection && (!isFileBoxEmpty()))
                 {
-                    fileBox.Enabled = false;
+
                     string changeAccessFilename = fileBox.Text;
 
                     string commandMessage = "CH_ACCESS" + " " + changeAccessFilename;
@@ -655,6 +653,10 @@ namespace Client
                     commandBuffer = Encoding.Default.GetBytes(commandMessage);
                     Array.Resize(ref commandBuffer, 64); //TODO: is it necessary?
                     clientSocket.Send(commandBuffer);
+                }
+                else if (isFileBoxEmpty())
+                {
+                    outputBox.AppendText("ERROR: File Box isEmpty\n");
                 }
                 else
                 {
@@ -720,7 +722,7 @@ namespace Client
         private bool getFileList()
         {
             List<String> fileList = new List<String>();
-            bool getFileError = true;
+            bool getFileError = false;
             bool result = true;
 
             Byte[] getFileBuffer = new byte[64];
@@ -743,17 +745,29 @@ namespace Client
                 catch
                 {
                     outputBox.AppendText("ERROR: During Get File\n");
-                    getFileError = false;
+                    getFileError = true;
                     break;
                 }
             }
 
-            if (getFileError)
+            if (!getFileError)
             {
-                string output = "Received File List\n";
+                string output = "Client: Received File List\n";
                 safeLogWrite(output);
                 //POSSIBLE PROBLEM with cross-thread calls
-                safeLogWrite(fileList);;
+                output = "\nFILE LIST:\n-------\n";
+                safeLogWrite(output);
+                int count = 0;
+                fileList.RemoveAll(checkEmptyString);
+                foreach (string element in fileList)
+                {
+                    count++;
+                    string fileLine = $"File-{count}: {element}\n";
+                    safeLogWrite(fileLine);
+                }
+                output = "-------\n\n";
+                safeLogWrite(output);
+                //safeLogWrite(fileList);
                 string message = "File List Received";
                 sendServerMessage(clientSocket, message);
             }
@@ -765,6 +779,16 @@ namespace Client
             }
 
             return result;
+        }
+        private static bool checkEmptyString(String s)
+        {
+            return (s == "");
+        }
+
+        private bool isFileBoxEmpty()
+        {
+            fileBox.Enabled = false;
+            return (fileBox.Text == "");
         }
     }
 }
