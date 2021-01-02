@@ -55,6 +55,7 @@
             this.myfileRadioButton = new System.Windows.Forms.RadioButton();
             this.publicFileRadioButton = new System.Windows.Forms.RadioButton();
             this.fileGroupBox = new System.Windows.Forms.GroupBox();
+            this.fileEntityBox = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.fileGroupBox.SuspendLayout();
             this.SuspendLayout();
@@ -65,7 +66,7 @@
             this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.label1.Font = new System.Drawing.Font("Segoe Print", 14F);
-            this.label1.Location = new System.Drawing.Point(814, 76);
+            this.label1.Location = new System.Drawing.Point(521, 54);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(130, 49);
             this.label1.TabIndex = 0;
@@ -75,7 +76,7 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Times New Roman", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label2.Location = new System.Drawing.Point(47, 44);
+            this.label2.Location = new System.Drawing.Point(13, 29);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(78, 19);
             this.label2.TabIndex = 1;
@@ -86,7 +87,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Times New Roman", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label3.Location = new System.Drawing.Point(47, 85);
+            this.label3.Location = new System.Drawing.Point(13, 70);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(100, 19);
             this.label3.TabIndex = 2;
@@ -96,10 +97,10 @@
             // 
             this.outputBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.outputBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.outputBox.Location = new System.Drawing.Point(12, 153);
+            this.outputBox.Location = new System.Drawing.Point(12, 139);
             this.outputBox.Name = "outputBox";
             this.outputBox.ReadOnly = true;
-            this.outputBox.Size = new System.Drawing.Size(703, 430);
+            this.outputBox.Size = new System.Drawing.Size(1016, 269);
             this.outputBox.TabIndex = 3;
             this.outputBox.Text = "";
             // 
@@ -107,7 +108,7 @@
             // 
             this.ipBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ipBox.Font = new System.Drawing.Font("Times New Roman", 10F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.ipBox.Location = new System.Drawing.Point(202, 28);
+            this.ipBox.Location = new System.Drawing.Point(168, 13);
             this.ipBox.Name = "ipBox";
             this.ipBox.Size = new System.Drawing.Size(141, 30);
             this.ipBox.TabIndex = 4;
@@ -116,7 +117,7 @@
             // 
             this.portBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.portBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.portBox.Location = new System.Drawing.Point(202, 69);
+            this.portBox.Location = new System.Drawing.Point(168, 54);
             this.portBox.Name = "portBox";
             this.portBox.Size = new System.Drawing.Size(141, 35);
             this.portBox.TabIndex = 5;
@@ -125,7 +126,7 @@
             // 
             this.connectButton.BackColor = System.Drawing.SystemColors.Info;
             this.connectButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.connectButton.Location = new System.Drawing.Point(407, 28);
+            this.connectButton.Location = new System.Drawing.Point(332, 13);
             this.connectButton.Name = "connectButton";
             this.connectButton.Size = new System.Drawing.Size(118, 43);
             this.connectButton.TabIndex = 6;
@@ -138,7 +139,7 @@
             this.stopButton.BackColor = System.Drawing.SystemColors.Info;
             this.stopButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.stopButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.stopButton.Location = new System.Drawing.Point(407, 104);
+            this.stopButton.Location = new System.Drawing.Point(332, 89);
             this.stopButton.Name = "stopButton";
             this.stopButton.Size = new System.Drawing.Size(118, 41);
             this.stopButton.TabIndex = 7;
@@ -150,7 +151,7 @@
             // 
             this.usernameBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.usernameBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.usernameBox.Location = new System.Drawing.Point(202, 110);
+            this.usernameBox.Location = new System.Drawing.Point(168, 95);
             this.usernameBox.Name = "usernameBox";
             this.usernameBox.Size = new System.Drawing.Size(141, 35);
             this.usernameBox.TabIndex = 8;
@@ -159,7 +160,7 @@
             // 
             this.label4.AutoSize = true;
             this.label4.Font = new System.Drawing.Font("Times New Roman", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.label4.Location = new System.Drawing.Point(47, 126);
+            this.label4.Location = new System.Drawing.Point(13, 111);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(77, 19);
             this.label4.TabIndex = 9;
@@ -169,7 +170,7 @@
             // 
             this.fileBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.fileBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.fileBox.Location = new System.Drawing.Point(766, 224);
+            this.fileBox.Location = new System.Drawing.Point(695, 29);
             this.fileBox.Name = "fileBox";
             this.fileBox.Size = new System.Drawing.Size(198, 35);
             this.fileBox.TabIndex = 11;
@@ -178,7 +179,7 @@
             // 
             this.browseButton.BackColor = System.Drawing.SystemColors.Info;
             this.browseButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.browseButton.Location = new System.Drawing.Point(766, 265);
+            this.browseButton.Location = new System.Drawing.Point(695, 70);
             this.browseButton.Name = "browseButton";
             this.browseButton.Size = new System.Drawing.Size(198, 27);
             this.browseButton.TabIndex = 12;
@@ -195,7 +196,7 @@
             this.uploadButton.BackColor = System.Drawing.SystemColors.Info;
             this.uploadButton.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.uploadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.uploadButton.Location = new System.Drawing.Point(732, 321);
+            this.uploadButton.Location = new System.Drawing.Point(908, 46);
             this.uploadButton.Name = "uploadButton";
             this.uploadButton.Size = new System.Drawing.Size(120, 43);
             this.uploadButton.TabIndex = 13;
@@ -207,7 +208,7 @@
             // 
             this.downloadFolderBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.downloadFolderBox.Font = new System.Drawing.Font("Times New Roman", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(162)));
-            this.downloadFolderBox.Location = new System.Drawing.Point(721, 548);
+            this.downloadFolderBox.Location = new System.Drawing.Point(737, 548);
             this.downloadFolderBox.Name = "downloadFolderBox";
             this.downloadFolderBox.Size = new System.Drawing.Size(291, 35);
             this.downloadFolderBox.TabIndex = 14;
@@ -216,7 +217,7 @@
             // 
             this.browseFolderButton.BackColor = System.Drawing.SystemColors.Info;
             this.browseFolderButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.browseFolderButton.Location = new System.Drawing.Point(766, 499);
+            this.browseFolderButton.Location = new System.Drawing.Point(787, 510);
             this.browseFolderButton.Name = "browseFolderButton";
             this.browseFolderButton.Size = new System.Drawing.Size(198, 32);
             this.browseFolderButton.TabIndex = 15;
@@ -228,7 +229,7 @@
             // 
             this.downloadButton.BackColor = System.Drawing.SystemColors.Info;
             this.downloadButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.downloadButton.Location = new System.Drawing.Point(903, 321);
+            this.downloadButton.Location = new System.Drawing.Point(260, 483);
             this.downloadButton.Name = "downloadButton";
             this.downloadButton.Size = new System.Drawing.Size(120, 43);
             this.downloadButton.TabIndex = 17;
@@ -240,7 +241,7 @@
             // 
             this.deleteButton.BackColor = System.Drawing.SystemColors.Info;
             this.deleteButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.deleteButton.Location = new System.Drawing.Point(732, 370);
+            this.deleteButton.Location = new System.Drawing.Point(51, 484);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(120, 42);
             this.deleteButton.TabIndex = 18;
@@ -252,7 +253,7 @@
             // 
             this.copyButton.BackColor = System.Drawing.SystemColors.Info;
             this.copyButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.copyButton.Location = new System.Drawing.Point(903, 370);
+            this.copyButton.Location = new System.Drawing.Point(469, 484);
             this.copyButton.Name = "copyButton";
             this.copyButton.Size = new System.Drawing.Size(120, 42);
             this.copyButton.TabIndex = 19;
@@ -264,7 +265,7 @@
             // 
             this.getFileButton.BackColor = System.Drawing.SystemColors.Info;
             this.getFileButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.getFileButton.Location = new System.Drawing.Point(766, 163);
+            this.getFileButton.Location = new System.Drawing.Point(725, 422);
             this.getFileButton.Name = "getFileButton";
             this.getFileButton.Size = new System.Drawing.Size(198, 46);
             this.getFileButton.TabIndex = 20;
@@ -276,7 +277,7 @@
             // 
             this.changeAccessButton.BackColor = System.Drawing.SystemColors.Info;
             this.changeAccessButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.changeAccessButton.Location = new System.Drawing.Point(766, 418);
+            this.changeAccessButton.Location = new System.Drawing.Point(220, 541);
             this.changeAccessButton.Name = "changeAccessButton";
             this.changeAccessButton.Size = new System.Drawing.Size(198, 42);
             this.changeAccessButton.TabIndex = 21;
@@ -287,7 +288,7 @@
             // pictureBox1
             // 
             this.pictureBox1.Image = global::Client.Properties.Resources.cloud;
-            this.pictureBox1.Location = new System.Drawing.Point(766, 12);
+            this.pictureBox1.Location = new System.Drawing.Point(473, -10);
             this.pictureBox1.Name = "pictureBox1";
             this.pictureBox1.Size = new System.Drawing.Size(198, 133);
             this.pictureBox1.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -297,7 +298,7 @@
             // myfileRadioButton
             // 
             this.myfileRadioButton.AutoSize = true;
-            this.myfileRadioButton.Location = new System.Drawing.Point(8, 12);
+            this.myfileRadioButton.Location = new System.Drawing.Point(18, 8);
             this.myfileRadioButton.Name = "myfileRadioButton";
             this.myfileRadioButton.Size = new System.Drawing.Size(87, 23);
             this.myfileRadioButton.TabIndex = 23;
@@ -308,7 +309,7 @@
             // publicFileRadioButton
             // 
             this.publicFileRadioButton.AutoSize = true;
-            this.publicFileRadioButton.Location = new System.Drawing.Point(8, 35);
+            this.publicFileRadioButton.Location = new System.Drawing.Point(18, 31);
             this.publicFileRadioButton.Name = "publicFileRadioButton";
             this.publicFileRadioButton.Size = new System.Drawing.Size(103, 23);
             this.publicFileRadioButton.TabIndex = 24;
@@ -320,21 +321,30 @@
             // 
             this.fileGroupBox.Controls.Add(this.publicFileRadioButton);
             this.fileGroupBox.Controls.Add(this.myfileRadioButton);
-            this.fileGroupBox.Location = new System.Drawing.Point(963, 151);
+            this.fileGroupBox.Location = new System.Drawing.Point(920, 414);
             this.fileGroupBox.Name = "fileGroupBox";
-            this.fileGroupBox.Size = new System.Drawing.Size(116, 73);
+            this.fileGroupBox.Size = new System.Drawing.Size(166, 73);
             this.fileGroupBox.TabIndex = 25;
             this.fileGroupBox.TabStop = false;
+            // 
+            // fileEntityBox
+            // 
+            this.fileEntityBox.FormattingEnabled = true;
+            this.fileEntityBox.Location = new System.Drawing.Point(12, 433);
+            this.fileEntityBox.Name = "fileEntityBox";
+            this.fileEntityBox.Size = new System.Drawing.Size(686, 27);
+            this.fileEntityBox.TabIndex = 26;
             // 
             // CLIENT
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 19F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.GradientInactiveCaption;
-            this.ClientSize = new System.Drawing.Size(1079, 599);
+            this.ClientSize = new System.Drawing.Size(1053, 606);
+            this.Controls.Add(this.getFileButton);
+            this.Controls.Add(this.fileEntityBox);
             this.Controls.Add(this.fileGroupBox);
             this.Controls.Add(this.changeAccessButton);
-            this.Controls.Add(this.getFileButton);
             this.Controls.Add(this.copyButton);
             this.Controls.Add(this.deleteButton);
             this.Controls.Add(this.downloadButton);
@@ -395,6 +405,7 @@
         private System.Windows.Forms.RadioButton myfileRadioButton;
         private System.Windows.Forms.RadioButton publicFileRadioButton;
         private System.Windows.Forms.GroupBox fileGroupBox;
+        private System.Windows.Forms.ComboBox fileEntityBox;
     }
 }
 

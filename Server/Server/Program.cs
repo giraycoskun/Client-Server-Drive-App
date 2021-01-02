@@ -175,8 +175,8 @@ namespace Server
             catch (Exception e)
             {
                 //TO-DO                
-                Console.WriteLine("Error: {0}", e.ToString());
-                throw e;
+                Console.WriteLine("Error: Database Connection Error");
+                //throw e;
 
             }
 

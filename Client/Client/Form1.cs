@@ -22,6 +22,7 @@ namespace Client
         Socket clientSocket;
         string DOWNLOAD_DIR = "";
         bool ACK_CHECK = false;
+        
 
 
         private static ManualResetEvent mre = new ManualResetEvent(false);
@@ -32,89 +33,96 @@ namespace Client
 
         private void ConnectButton_Click(object sender, EventArgs e)
         {
-            clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            ipBox.Enabled = false;
-            portBox.Enabled = false;
-            usernameBox.Enabled = false;
-            string ipBoxText = ipBox.Text;
-            bool inputCheck = true;
-            username = usernameBox.Text;
-
-            try
+            if (!connected)
             {
-                Int32.TryParse(portBox.Text, out serverPortNum);
-                serverIPAddress = IPAddress.Parse(ipBoxText);
-            }
-            catch
-            {
-                ipBox.Text = "";
-                portBox.Text = "";
-                usernameBox.Text = "";
-                inputCheck = false;
-            }
-
-            if (inputCheck && username != "" && ipBoxText != "")
-            {
+                clientSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                ipBox.Enabled = false;
+                portBox.Enabled = false;
+                usernameBox.Enabled = false;
+                string ipBoxText = ipBox.Text;
+                bool inputCheck = true;
+                username = usernameBox.Text;
 
                 try
                 {
-                    clientSocket.Connect(serverIPAddress, serverPortNum);
-                    connected = true;
-                    outputBox.AppendText($"CONNECTED to the server with ip: {ipBoxText} and port: {serverPortNum} !\n");
-                    string helloMessage = username;
-                    if (username != "" && helloMessage.Length <= 64)
-                    {
-                        Byte[] buffer = new Byte[64];
-                        buffer = Encoding.Default.GetBytes(helloMessage);
-                        clientSocket.Send(buffer);
-                    }
-                    else
-                    {
-                        outputBox.AppendText("Username length is either empty or too long!\n");
-                    }
+                    Int32.TryParse(portBox.Text, out serverPortNum);
+                    serverIPAddress = IPAddress.Parse(ipBoxText);
+                }
+                catch
+                {
+                    ipBox.Text = "";
+                    portBox.Text = "";
+                    usernameBox.Text = "";
+                    inputCheck = false;
+                }
 
-                    string incomingMessage = "";
+                if (inputCheck && username != "" && ipBoxText != "")
+                {
 
                     try
                     {
-                        Byte[] hello_buffer = new Byte[64];
-                        clientSocket.Receive(hello_buffer);
-                        incomingMessage = Encoding.Default.GetString(hello_buffer);
-                        incomingMessage = incomingMessage.TrimEnd('\0');
-                        outputBox.AppendText("Server: " + incomingMessage + "\n");
-                        Thread listenThread = new Thread(ListenServer);
-                        listenThread.IsBackground = true;
-                        listenThread.Start();
-                    }
-                    catch
-                    {
-                        outputBox.AppendText("Connection STOPPED \n");
-                        clientSocket.Close();
-                        connected = false;
-                        EnableInputBoxes();
-                    }
+                        clientSocket.Connect(serverIPAddress, serverPortNum);
+                        connected = true;
+                        outputBox.AppendText($"CONNECTED to the server with ip: {ipBoxText} and port: {serverPortNum} !\n");
+                        string helloMessage = username;
+                        if (username != "" && helloMessage.Length <= 64)
+                        {
+                            Byte[] buffer = new Byte[64];
+                            buffer = Encoding.Default.GetBytes(helloMessage);
+                            clientSocket.Send(buffer);
+                        }
+                        else
+                        {
+                            outputBox.AppendText("Username length is either empty or too long!\n");
+                        }
 
-                    if (incomingMessage == "REJECT")
-                    {
-                        clientSocket.Close();
-                        connected = false;
-                        EnableInputBoxes();
-                    }
+                        string incomingMessage = "";
 
+                        try
+                        {
+                            Byte[] hello_buffer = new Byte[64];
+                            clientSocket.Receive(hello_buffer);
+                            incomingMessage = Encoding.Default.GetString(hello_buffer);
+                            incomingMessage = incomingMessage.TrimEnd('\0');
+                            outputBox.AppendText("Server: " + incomingMessage + "\n");
+                            Thread listenThread = new Thread(ListenServer);
+                            listenThread.IsBackground = true;
+                            listenThread.Start();
+                        }
+                        catch
+                        {
+                            outputBox.AppendText("Connection STOPPED \n");
+                            clientSocket.Close();
+                            connected = false;
+                            EnableInputBoxes();
+                        }
+
+                        if (incomingMessage == "REJECT")
+                        {
+                            clientSocket.Close();
+                            connected = false;
+                            EnableInputBoxes();
+                        }
+
+                    }
+                    catch (Exception except)
+                    {
+                        outputBox.AppendText("ERROR: Connection Fault not established \n");
+                        connected = false;
+                        clientSocket.Close();
+                        EnableInputBoxes();
+
+                    }
                 }
-                catch (Exception except)
+                else
                 {
-                    outputBox.AppendText("ERROR: Connection Fault not established \n");
-                    connected = false;
-                    clientSocket.Close();
+                    outputBox.AppendText("Invalid or Empty Inputs\n");
                     EnableInputBoxes();
-
                 }
             }
             else
             {
-                outputBox.AppendText("Invalid or Empty Inputs\n");
-                EnableInputBoxes();
+                outputBox.AppendText("Already Connected\n");
             }
 
         }
@@ -400,18 +408,20 @@ namespace Client
                     outputBox.AppendText("Cannot copy without connection.\n");
                 }
 
-                if (connection && (!IsFileBoxEmpty()))
+                if (connection && (fileEntityBox.SelectedIndex != -1))
                 {
-                    string copyFilename = fileBox.Text;
+                    fileEntityBox.Enabled = false;     
+                    string fileItem = fileEntityBox.SelectedItem.ToString();
+                    string copyFilename = parseFileItem(fileItem);
 
-                    string commandMessage = "COPY" + " " + copyFilename;
+                   string commandMessage = "COPY" + " " + copyFilename;
                     Byte[] commandBuffer = new Byte[64];
                     commandBuffer = Encoding.Default.GetBytes(commandMessage);
                     Array.Resize(ref commandBuffer, 64); //TODO: is it necessary?
                     clientSocket.Send(commandBuffer);
                     
                 }
-                else if(IsFileBoxEmpty())
+                else if(connected)
                 {
                     outputBox.AppendText("ERROR: File Box is Empty\n");
                 }
@@ -421,7 +431,7 @@ namespace Client
                     EnableInputBoxes();
                     clientSocket.Close();
                 }
-                fileBox.Enabled = true;
+                fileEntityBox.Enabled = true;
             }
         }
 
@@ -443,13 +453,16 @@ namespace Client
                     outputBox.AppendText("Cannot download without connection.\n");
                 }
 
-                if (connection && (!IsFileBoxEmpty()))
+                if (connection && (fileEntityBox.SelectedIndex != -1))
                 {
-                    fileBox.Enabled = false;
-                    string downloadFilename = fileBox.Text;
+                    //fileBox.Enabled = false;
+                    //string downloadFilename = fileBox.Text;
+                    string fileItem = fileEntityBox.SelectedItem.ToString();
+                    string downloadFilename = parseFileItem(fileItem);
+                    fileEntityBox.Enabled = false;
                     filepath = DOWNLOAD_DIR;
 
-                    if (DOWNLOAD_DIR != "")
+                    if (DOWNLOAD_DIR != "" && downloadFilename != "")
                     {
                         //TODO:
                         string commandMessage = "DOWNLOAD" + " " + downloadFilename;
@@ -458,22 +471,47 @@ namespace Client
                         Array.Resize(ref commandBuffer, 64);
                         clientSocket.Send(commandBuffer);
                     }
-                    else if(IsFileBoxEmpty())
+                    else if(downloadFilename == "")
                     {
-                        outputBox.AppendText("ERROR:File Name is Empty\n");
+                        outputBox.AppendText("ERROR: File Name is Wrong\n");
                     }
                     else
                     {
                         outputBox.AppendText("ERROR: Download Directory is not set \n");
                     }
                 }
+                else if(connection)
+                {
+                    outputBox.AppendText("Error: File Item is not Selected\n");
+                }
                 else
                 {
-                    outputBox.AppendText("ERROR: NOT CONNECTED\n");
+                    outputBox.AppendText("ERROR: Not Connected\n");
                     EnableInputBoxes();
                     clientSocket.Close();
                 }
-                fileBox.Enabled = true;
+            }
+            fileEntityBox.Enabled = true;
+        }
+
+        private string parseFileItem(string fileEntity)
+        {
+            try
+            {
+
+                int startIndexOwner = fileEntity.IndexOf("Owner") + 7;
+                int stopIndexOwner = fileEntity.IndexOf("|") - 1;
+                int startIndexName = fileEntity.IndexOf("Name") + 6;
+                int stopIndexName = fileEntity.IndexOf("|", startIndexName) - 1;  ;
+
+                string owner = fileEntity.Substring(startIndexOwner, stopIndexOwner-startIndexOwner);
+                string filename = fileEntity.Substring(startIndexName, stopIndexName-startIndexName);
+
+                return (owner + "." + filename);
+            }
+            catch
+            {
+                return "";
             }
         }
 
@@ -595,17 +633,19 @@ namespace Client
                     outputBox.AppendText("Cannot delete without connection.\n");
                 }
 
-                if (connection && (!IsFileBoxEmpty()))
+                if (connection && (fileEntityBox.SelectedIndex != -1))
                 {
-                    string deleteFilename = fileBox.Text;                  
+                    fileEntityBox.Enabled = false;
+                    string fileItem = fileEntityBox.SelectedItem.ToString();
+                    string deleteFilename = parseFileItem(fileItem);    
 
                     string commandMessage = "DELETE" + " " + deleteFilename;
                     Byte[] commandBuffer = new Byte[64];
                     commandBuffer = Encoding.Default.GetBytes(commandMessage);
-                    Array.Resize(ref commandBuffer, 64); //TODO: is it necesarry
+                    //Array.Resize(ref commandBuffer, 64); //TODO: is it necesarry
                     clientSocket.Send(commandBuffer);
                 }
-                else if(IsFileBoxEmpty())
+                else if(connected)
                 {
                     outputBox.AppendText("ERROR: File Name is Empty\n");
                 }
@@ -615,7 +655,7 @@ namespace Client
                     EnableInputBoxes();
                     clientSocket.Close();
                 }
-                fileBox.Enabled = true;
+                fileEntityBox.Enabled = true;
             }
         }
 
@@ -637,10 +677,11 @@ namespace Client
                     outputBox.AppendText("Cannot change access without connection.\n");
                 }
 
-                if (connection && (!IsFileBoxEmpty()))
+                if (connection && (fileEntityBox.SelectedIndex != -1))
                 {
-
-                    string changeAccessFilename = fileBox.Text;
+                    fileEntityBox.Enabled = false;
+                    string fileItem = fileEntityBox.SelectedItem.ToString();
+                    string changeAccessFilename = parseFileItem(fileItem);
 
                     string commandMessage = "CH_ACCESS" + " " + changeAccessFilename;
                     Byte[] commandBuffer = new Byte[64];
@@ -648,7 +689,7 @@ namespace Client
                     Array.Resize(ref commandBuffer, 64); //TODO: is it necessary?
                     clientSocket.Send(commandBuffer);
                 }
-                else if (IsFileBoxEmpty())
+                else if (connection)
                 {
                     outputBox.AppendText("ERROR: File Box is Empty\n");
                 }
@@ -658,7 +699,7 @@ namespace Client
                     EnableInputBoxes();
                     clientSocket.Close();
                 }
-                fileBox.Enabled = true;
+                fileEntityBox.Enabled = true;
             }
         }
 
@@ -729,6 +770,8 @@ namespace Client
                 numBytes = clientSocket.Receive(fileCountBuffer);
                 getFileMessage = Encoding.Default.GetString(fileCountBuffer);
                 fileCount = Int32.Parse(getFileMessage.TrimEnd('\0'));
+                string ack = "ACK Number of Files " + fileCount.ToString();
+                SendServerMessage(clientSocket, ack);
             }
             catch
             {
@@ -737,6 +780,7 @@ namespace Client
             }
 
             Byte[] getFileBuffer = new byte[128];
+            string fileNameList = "";
             bool fileNumCheck = true;
             int temp = 0;
             while (fileNumCheck && (fileCount > 0))
@@ -748,9 +792,16 @@ namespace Client
                     //int index = Array.FindIndex(getFileBuffer, checkEnd);
                     getFileMessage = Encoding.Default.GetString(getFileBuffer);
                     getFileMessage = getFileMessage.TrimEnd('\0');
-                    string[] fileArray = getFileMessage.Split('\n');
-                    fileList.AddRange(fileArray);
-                    temp += 1;
+                    fileNameList += getFileMessage;
+
+                    foreach (char c in getFileMessage)
+                    {
+                        if(c == '\n')
+                        {
+                            temp += 1;
+                        }
+                    }
+                 
                     if (temp == fileCount)
                     {
                         break;
@@ -767,16 +818,26 @@ namespace Client
             if (!getFileError)
             {
                 string output = "Client: Received File List\n";
+                string[] fileArray = fileNameList.Split('\n');
+                fileList.AddRange(fileArray);
                 SafeLogWrite(output);
                 
                 output = "\nFILE LIST:\n-------\n";
                 SafeLogWrite(output);
+
+                fileEntityBox.Invoke(new Action(() => fileEntityBox.Items.Clear()));
+
+                //fileEntityBox.Items.Clear();
+                //fileEntityBox.Items.AddRange(fileArray);
+                
                 if (fileCount > 0)
                 {
                     int count = 0;
                     fileList.RemoveAll(CheckEmptyString);
                     foreach (string element in fileList)
                     {
+                        //fileEntityBox.Items.Add(element);
+                        fileEntityBox.Invoke(new Action(() => fileEntityBox.Items.Add(element)));
                         count++;
                         string fileLine = $"File-{count}: {element}\n";
                         SafeLogWrite(fileLine);

@@ -80,7 +80,7 @@ UNIQUE (filename, owner)
 - private void StartButton_Click(object sender, EventArgs e)
 - private void StopButton_Click(object sender, EventArgs e)
 - private void Accept()
-- private void Receive(Socket thisClient) // updated
+- private void Receive(Socket thisClient)
 - private bool CheckUsername(string username)
 - private void HandleClient(Socket client, string username)
 - private bool UploadCommand(Socket client, string commandMessage, string username, string filename)
