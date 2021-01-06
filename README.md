@@ -15,8 +15,6 @@ Visual Studio .NET mysql setup
 - 3-)VS -> Server -> Tools-> connect to Database ->  
 
 - host: https://remotemysql.com/phpmyadmin/
-- username: ioI0xzbThf
-- password: VGITbQxEEa
 
 **Database Structure**
 id(int) | fileName(string) | filePath(string) | owner(string) | incCount(int) | accessType(PUBLIC, PRIVATE)
