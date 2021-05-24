@@ -22,10 +22,6 @@ id(int) | fileName(string) | filePath(string) | owner(string) | incCount(int) | 
 Primary Key - id
 UNIQUE (filename, owner)
 
-**Public Static Objects for DB:**
-- connectionstring = "server=remotemysql.com;userid=ioI0xzbThf;password=VGITbQxEEa;database=ioI0xzbThf"
-- MySqlConnection databaseConnection = new MySqlConnection(connectionString);
-
 **Database Functions:**
 
   
